@@ -2,6 +2,8 @@ package numble.banking.core.user.command.domain;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import numble.banking.core.common.error.exception.BadRequestException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +31,9 @@ class UserTest {
     user.encryptPassword();
 
     // then
-    assertNotNull(user);
-    assertEquals(loginId, user.getLoginId());
-    assertTrue(user.verifyPassword(password));
+    Assertions.assertThat(user).isNotNull();
+    Assertions.assertThat(user.verifyPassword(password)).isTrue();
+    Assertions.assertThat(user.getLoginId()).isEqualTo(loginId);
   }
 
 
@@ -56,8 +58,8 @@ class UserTest {
     user.encryptPassword();
 
     // then
-    assertNotNull(user);
-    assertTrue(user.verifyPassword(password));
+    Assertions.assertThat(user).isNotNull();
+    Assertions.assertThat(user.verifyPassword(password)).isTrue();
   }
 
   @Test
@@ -81,7 +83,8 @@ class UserTest {
     user.encryptPassword();
 
     // then
-    assertNotNull(user);
-    assertTrue(user.verifyPassword(password));
+    Assertions.assertThat(user).isNotNull();
+    Assertions.assertThatThrownBy(() -> user.verifyPassword(otherPassword))
+        .isInstanceOf(BadRequestException.class);
   }
 }

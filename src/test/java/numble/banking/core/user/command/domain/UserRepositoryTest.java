@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import numble.banking.support.repository.BaseRepositoryTest;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,9 +44,9 @@ class UserRepositoryTest extends BaseRepositoryTest {
     User savedUser = userRepository.save(user);
 
     // then
-    assertThat(savedUser).isNotNull();
-    assertEquals(loginId, savedUser.getLoginId());
-    assertTrue(savedUser.verifyPassword(password));
+    Assertions.assertThat(savedUser).isNotNull();
+    Assertions.assertThat(savedUser.getLoginId()).isEqualTo(loginId);
+    Assertions.assertThat(savedUser.verifyPassword(password)).isTrue();
   }
 
 }

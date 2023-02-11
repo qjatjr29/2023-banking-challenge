@@ -3,6 +3,7 @@ package numble.banking.core.user.command.application;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
+import numble.banking.core.common.error.exception.BadRequestException;
 import numble.banking.core.common.error.exception.ConflictException;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
@@ -76,8 +77,8 @@ class UserServiceTest {
 
       // when
       // then
-      assertThrows(ConflictException.class,
-          () -> userService.signup(request));
+      Assertions.assertThatThrownBy(() -> userService.signup(request))
+          .isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -89,8 +90,8 @@ class UserServiceTest {
 
       // when
       // then
-      assertThrows(ConflictException.class,
-          () -> userService.signup(request));
+      Assertions.assertThatThrownBy(() -> userService.signup(request))
+          .isInstanceOf(ConflictException.class);
     }
 
     @Test
@@ -102,8 +103,8 @@ class UserServiceTest {
 
       // when
       // then
-      assertThrows(ConflictException.class,
-          () -> userService.signup(request));
+      Assertions.assertThatThrownBy(() -> userService.signup(request))
+          .isInstanceOf(ConflictException.class);
     }
   }
 

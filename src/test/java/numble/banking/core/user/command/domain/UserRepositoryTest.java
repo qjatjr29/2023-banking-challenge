@@ -1,7 +1,5 @@
 package numble.banking.core.user.command.domain;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import numble.banking.support.repository.BaseRepositoryTest;
 import org.assertj.core.api.Assertions;

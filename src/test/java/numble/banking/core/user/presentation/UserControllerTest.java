@@ -43,7 +43,7 @@ class UserControllerTest extends BaseControllerTest {
     loginId = "beomsic";
     password = "beomsic12!";
     email = "beomsic@gmail.com";
-    phone = "010-0000-000";
+    phone = "010-0000-0000";
   }
 
   @Test
@@ -88,9 +88,10 @@ class UserControllerTest extends BaseControllerTest {
                 fieldWithPath("name").type(JsonFieldType.STRING).description("이름"),
                 fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
                 fieldWithPath("phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
-                fieldWithPath("zipCode").type(JsonFieldType.STRING).description("우편번호"),
-                fieldWithPath("address").type(JsonFieldType.STRING).description("주소"),
-                fieldWithPath("roadAddress").type(JsonFieldType.STRING).description("도로명주소")
+                fieldWithPath("address").type(JsonFieldType.OBJECT).description("주소 정보"),
+                fieldWithPath("address.zipCode").type(JsonFieldType.STRING).description("우편번호"),
+                fieldWithPath("address.address").type(JsonFieldType.STRING).description("주소"),
+                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소")
             )
         ));
   }

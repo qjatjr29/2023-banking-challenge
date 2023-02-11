@@ -13,6 +13,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import numble.banking.core.common.domain.BaseEntity;
+import numble.banking.core.common.error.exception.BadRequestException;
+import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.user.command.application.PasswordEncryptor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -52,5 +55,15 @@ public class User extends BaseEntity {
   @Column(name = "is_deleted")
   @Builder.Default
   private Boolean isDeleted = Boolean.FALSE;
+
+  public void encryptPassword() {
+    if(this.password == null) throw new IllegalStateException();
+    this.password = PasswordEncryptor.encrypt(this.password);
+  }
+
+  public boolean verifyPassword(String password) {
+    if(!PasswordEncryptor.isMatch(password, this.password)) throw new BadRequestException(ErrorCode.BAD_REQUEST);
+    else return true;
+  }
 
 }

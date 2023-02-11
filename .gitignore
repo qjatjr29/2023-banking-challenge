@@ -176,5 +176,6 @@ gradle-app.setting
 src/main/resources/application.yaml
 src/main/resources/application.yml
 
+**/application.yml
 
 

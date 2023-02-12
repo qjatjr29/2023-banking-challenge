@@ -68,8 +68,7 @@ public class User extends BaseEntity {
   }
 
   public boolean verifyPassword(String password) {
-    if(!PasswordEncryptor.isMatch(password, this.password)) throw new BadRequestException(ErrorCode.BAD_REQUEST);
-    else return true;
+    return PasswordEncryptor.isMatch(password, this.password);
   }
 
 }

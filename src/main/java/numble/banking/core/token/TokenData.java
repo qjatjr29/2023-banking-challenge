@@ -25,4 +25,7 @@ public class TokenData {
         .build();
   }
 
+  public static TokenData from(Long userId, String userEmail, String userRole) {
+    return new TokenData(userId, userEmail, userRole);
+  }
 }

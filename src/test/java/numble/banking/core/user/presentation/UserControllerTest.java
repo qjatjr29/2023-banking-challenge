@@ -233,6 +233,63 @@ class UserControllerTest extends BaseControllerTest {
 
   }
 
+  @Test
+  @DisplayName("이름으로 유저 조회 테스트")
+  void getUserSummaryByNameInfo() throws Exception {
+
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    for(int i = 0; i < 10; i++) {
+      generateUser(loginId + i, password + i, email + i, phone + i);
+    }
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    ResultActions result = mockMvc.perform(get("/users/name")
+        .contentType(MediaType.APPLICATION_JSON)
+        .param("name", "test")
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andExpect(jsonPath("totalElements").value(10))
+        .andDo(document("유저 - 이름으로 조회 성공",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].name").type(JsonFieldType.STRING).description("이름"),
+                fieldWithPath("content.[].email").type(JsonFieldType.STRING).description("이메일"),
+                fieldWithPath("content.[].phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
+
+                fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
+                fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),
+                fieldWithPath("pageable.sort.empty").type(JsonFieldType.BOOLEAN).description("정렬 empty"),
+                fieldWithPath("pageable.sort.unsorted").type(JsonFieldType.BOOLEAN).description("정렬 X 여부"),
+                fieldWithPath("pageable.sort.sorted").type(JsonFieldType.BOOLEAN).description("정렬 O 여부"),
+
+                fieldWithPath("pageable.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
+                fieldWithPath("pageable.pageSize").type(JsonFieldType.NUMBER).description("한 페이지에 나오는 원소 수"),
+                fieldWithPath("pageable.offset").type(JsonFieldType.NUMBER).description(""),
+                fieldWithPath("pageable.unpaged").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("pageable.paged").type(JsonFieldType.BOOLEAN).description(""),
+
+                fieldWithPath("totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                fieldWithPath("totalElements").type(JsonFieldType.NUMBER).description("전체 검색 갯수"),
+                fieldWithPath("last").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("size").type(JsonFieldType.NUMBER).description("한 페이지 사이즈"),
+                fieldWithPath("number").type(JsonFieldType.NUMBER).description(""),
+                fieldWithPath("sort.empty").type(JsonFieldType.BOOLEAN).description("정렬 empty"),
+                fieldWithPath("sort.unsorted").type(JsonFieldType.BOOLEAN).description("정렬 X 여부"),
+                fieldWithPath("sort.sorted").type(JsonFieldType.BOOLEAN).description("정렬 O 여부"),
+                fieldWithPath("first").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("empty").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("numberOfElements").type(JsonFieldType.NUMBER).description("한 페이지의 원소 수")
+            )
+        ));
+  }
+
   static Stream<Arguments> signupFailRequests() {
     return Stream.of(
 

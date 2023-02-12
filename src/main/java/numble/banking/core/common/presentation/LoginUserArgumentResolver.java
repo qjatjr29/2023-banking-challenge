@@ -23,13 +23,11 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
     this.jwtTokenProvider = jwtTokenProvider;
   }
 
-  // 메소드에 바인딩할 클래스를 명시
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
     return parameter.hasParameterAnnotation(LoginUser.class);
   }
 
-  // JWT 토큰에서 값을 가져와 어노테이션에 저장.
   @Override
   public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
       NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
@@ -38,7 +36,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
     if(token == null || token.length() == 0) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
 
-    return jwtTokenProvider.getUserId(token);
+    return jwtTokenProvider.getTokenData(token).getUserId();
   }
 
 }

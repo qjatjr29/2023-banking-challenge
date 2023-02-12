@@ -7,13 +7,18 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.stream.Stream;
 import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.token.JwtTokenProvider;
+import numble.banking.core.token.TokenData;
 import numble.banking.core.user.command.application.SignupRequest;
+import numble.banking.core.user.command.domain.Address;
+import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import numble.banking.support.controller.BaseControllerTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +35,13 @@ import org.springframework.test.web.servlet.ResultActions;
 @DisplayName("유저 API 테스트")
 class UserControllerTest extends BaseControllerTest {
 
+  static final String AUTHORIZATION_HEADER = "Authorization";
+
   @Autowired
   UserRepository userRepository;
+
+  @Autowired
+  JwtTokenProvider jwtTokenProvider;
 
   String loginId;
   String password;
@@ -48,8 +58,8 @@ class UserControllerTest extends BaseControllerTest {
 
   @Test
   @DisplayName("회원가입 성공 테스트")
-  void signup_success() throws Exception {
-    // Given
+  void signupSuccess() throws Exception {
+    // given
     SignupRequest signUpRequest = SignupRequest.builder()
         .loginId(loginId)
         .password(password)
@@ -61,12 +71,12 @@ class UserControllerTest extends BaseControllerTest {
         .roadAddress("서울시")
         .build();
 
-    // When
+    // when
     ResultActions result = mockMvc.perform(post("/users")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(signUpRequest)));
 
-    // Then
+    // then
     result.andExpect(status().isCreated())
         .andExpect(jsonPath("email").value(email))
         .andExpect(jsonPath("phone").value(phone))
@@ -89,9 +99,9 @@ class UserControllerTest extends BaseControllerTest {
                 fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
                 fieldWithPath("phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
                 fieldWithPath("address").type(JsonFieldType.OBJECT).description("주소 정보"),
-                fieldWithPath("address.zipCode").type(JsonFieldType.STRING).description("우편번호"),
-                fieldWithPath("address.address").type(JsonFieldType.STRING).description("주소"),
-                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소")
+                fieldWithPath("address.zipCode").type(JsonFieldType.STRING).description("우편번호").optional(),
+                fieldWithPath("address.address").type(JsonFieldType.STRING).description("주소").optional(),
+                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소").optional()
             )
         ));
   }
@@ -101,13 +111,13 @@ class UserControllerTest extends BaseControllerTest {
   @DisplayName("SignupRequest dto 에 잘못된 값들이 들어온 경우")
   void signupInvalidValueExceptionThrown(String field, SignupRequest signRequest) throws Exception {
 
-    // Given
-    // When
+    // given
+    // when
     ResultActions result = mockMvc.perform(post("/users")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(signRequest)));
 
-    // Then
+    // then
     result.andExpect(status().isBadRequest())
         .andExpect(jsonPath("resultCode").value(ErrorCode.INVALID_INPUT_VALUE.getResultCode()))
         .andExpect(jsonPath("statusCode").value(400))
@@ -131,6 +141,41 @@ class UserControllerTest extends BaseControllerTest {
         );
   }
 
+  @Test
+  @DisplayName("내정보 조회 테스트")
+  void getUserInfo() throws Exception {
+
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    ResultActions result = mockMvc.perform(get("/users/me")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andExpect(jsonPath("email").value(email))
+        .andExpect(jsonPath("phone").value(phone))
+        .andDo(document("유저 - 내 정보 조회 성공",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("loginId").type(JsonFieldType.STRING).description("유저 로그인 아이디"),
+                fieldWithPath("name").type(JsonFieldType.STRING).description("이름"),
+                fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
+                fieldWithPath("phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
+                fieldWithPath("address").type(JsonFieldType.OBJECT).description("주소 정보"),
+                fieldWithPath("address.zipCode").type(JsonFieldType.STRING).description("우편번호").optional(),
+                fieldWithPath("address.address").type(JsonFieldType.STRING).description("주소").optional(),
+                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소").optional()
+            )
+        ));
+
+  }
+
   static Stream<Arguments> signupFailRequests() {
     return Stream.of(
 
@@ -152,6 +197,22 @@ class UserControllerTest extends BaseControllerTest {
         fieldWithPath("errors.[].value").type(JsonFieldType.STRING).description("값"),
         fieldWithPath("errors.[].errorMessage").type(JsonFieldType.STRING).description("에러 발생 이유")
     );
+  }
+
+  private User generateUser(String loginId, String password, String email, String phone) {
+
+    User user = User.builder()
+        .loginId(loginId)
+        .password(password)
+        .name("test")
+        .email(email)
+        .phone(phone)
+        .address(Address.from("03333", "서울시", "서울시"))
+        .build();
+
+    user.encryptPassword();
+
+    return userRepository.save(user);
   }
 
 

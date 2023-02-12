@@ -14,13 +14,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.stream.Stream;
 import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.token.JwtTokenProvider;
 import numble.banking.core.token.TokenData;
 import numble.banking.core.user.command.application.SignupRequest;
 import numble.banking.core.user.command.domain.Address;
+import numble.banking.core.user.command.domain.Role;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import numble.banking.support.controller.BaseControllerTest;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,9 +31,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @DisplayName("유저 API 테스트")
 class UserControllerTest extends BaseControllerTest {
@@ -290,6 +295,51 @@ class UserControllerTest extends BaseControllerTest {
         ));
   }
 
+  @Test
+  @DisplayName("유저 정보 삭제 테스트")
+  void delete() throws Exception {
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/users")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isNoContent())
+        .andDo(document("유저 - 유저 삭제 성공",
+            getDocumentRequest(),
+            getDocumentResponse()
+        ));
+
+    Assertions.assertThatThrownBy(() -> userRepository.existsByLoginId(loginId))
+        .isInstanceOf(InvalidDataAccessResourceUsageException.class);
+  }
+
+  @Test
+  @DisplayName("유저 정보 삭제 실패 테스트 - 없는 유저")
+  void deleteNotExistUser() throws Exception {
+    // given
+    TokenData tokenData = TokenData.from(2L, email, Role.USER.name());
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/users")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isNotFound())
+        .andDo(document("유저 - 유저 삭제 실패(없는 유저 삭제 요청)",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            getErrorResponseField()
+        ));
+  }
+
   static Stream<Arguments> signupFailRequests() {
     return Stream.of(
 
@@ -307,9 +357,9 @@ class UserControllerTest extends BaseControllerTest {
         fieldWithPath("message").type(JsonFieldType.STRING).description("에러 메세지"),
         fieldWithPath("statusCode").type(JsonFieldType.NUMBER).description("HTTP 상태코드"),
         fieldWithPath("errors").type(JsonFieldType.ARRAY).description("에러 상세 정보"),
-        fieldWithPath("errors.[].field").type(JsonFieldType.STRING).description("에러 발생 필드"),
-        fieldWithPath("errors.[].value").type(JsonFieldType.STRING).description("값"),
-        fieldWithPath("errors.[].errorMessage").type(JsonFieldType.STRING).description("에러 발생 이유")
+        fieldWithPath("errors.[].field").type(JsonFieldType.STRING).description("에러 발생 필드").optional(),
+        fieldWithPath("errors.[].value").type(JsonFieldType.STRING).description("값").optional(),
+        fieldWithPath("errors.[].errorMessage").type(JsonFieldType.STRING).description("에러 발생 이유").optional()
     );
   }
 

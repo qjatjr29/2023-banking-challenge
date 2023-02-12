@@ -5,6 +5,7 @@ import java.util.List;
 import numble.banking.core.common.error.ErrorField;
 import numble.banking.core.common.error.exception.ConflictException;
 import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.user.command.domain.Address;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
@@ -43,6 +44,14 @@ public class UserService {
     userRepository.save(user);
 
     return UserDetailResponse.of(user);
+  }
+
+  public void delete(Long userId) {
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+    userRepository.delete(user);
   }
 
 

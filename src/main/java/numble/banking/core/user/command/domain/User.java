@@ -3,6 +3,8 @@ package numble.banking.core.user.command.domain;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -52,6 +54,10 @@ public class User extends BaseEntity {
   @Embedded
   private Address address;
 
+  @Enumerated(value = EnumType.STRING)
+  @Builder.Default
+  private Role role = Role.USER;
+
   @Column(name = "is_deleted")
   @Builder.Default
   private Boolean isDeleted = Boolean.FALSE;
@@ -62,8 +68,7 @@ public class User extends BaseEntity {
   }
 
   public boolean verifyPassword(String password) {
-    if(!PasswordEncryptor.isMatch(password, this.password)) throw new BadRequestException(ErrorCode.BAD_REQUEST);
-    else return true;
+    return PasswordEncryptor.isMatch(password, this.password);
   }
 
 }

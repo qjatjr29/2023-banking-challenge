@@ -17,6 +17,7 @@ public enum ErrorCode {
   DUPLICATE_LOGIN_ID(409, "USER-005", "계정명이 중복된 경우"),
   DUPLICATE_PHONE_NUMBER(409, "USER-006", "휴대폰 번호가 중복된 경우"),
   DUPLICATE_EMAIL(409, "USER-006", "이메일이 중복된 경우"),
+  WRONG_PASSWORD(400, "USER-007", "비밀번호가 잘 못 입력된 경우"),
 
   EXPIRED_VERIFICATION_TOKEN(403, "AUTH-001", "인증 토큰이 만료된 경우"),
   INVALID_VERIFICATION_TOKEN(403, "AUTH-002", "토큰이 유효하지 않은 경우"),

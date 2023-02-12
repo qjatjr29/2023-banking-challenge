@@ -19,4 +19,7 @@ public interface UserDao extends JpaRepository<UserData, Long> {
       + "FROM User u WHERE u.id <> :id")
   Page<UserSummaryResponse> findSummaryList(@Param("id") Long id, Pageable pageable);
 
+  @Query("SELECT new numble.banking.core.user.query.dto.UserSummaryResponse(u.name, u.email, u.phone) "
+      + "FROM User u WHERE u.id <> :id and u.name = :name")
+  Page<UserSummaryResponse> findAllByName(@Param("name") String name, @Param("id") Long userId, Pageable pageable);
 }

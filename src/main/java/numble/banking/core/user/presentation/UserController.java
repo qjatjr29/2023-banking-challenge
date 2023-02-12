@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -63,6 +64,14 @@ public class UserController {
     return ResponseEntity.ok(summaryList);
   }
 
-//  @GetMapping("/")
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/name")
+  public ResponseEntity<Page<UserSummaryResponse>> getUsersByName(@RequestParam("name") String name,
+      @LoginUser Long userId,
+      @PageableDefault(page = 0, size = 15) Pageable pageable) {
+
+    Page<UserSummaryResponse> summaryList = userDao.findAllByName(name, userId, pageable);
+    return ResponseEntity.ok(summaryList);
+  }
 
 }

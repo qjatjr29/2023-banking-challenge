@@ -60,14 +60,14 @@ class JwtTokenProviderTest {
 
     // when
     String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+    TokenData data = jwtTokenProvider.getTokenData(accessToken);
 
     // then
-    Assertions.assertThat(jwtTokenProvider.getUserId(accessToken))
-        .isEqualTo(id);
-    Assertions.assertThat(jwtTokenProvider.getUserEmail(accessToken))
-        .isEqualTo(email);
-    Assertions.assertThat(jwtTokenProvider.getUserRole(accessToken))
-        .isEqualTo(role.name());
+
+    Assertions.assertThat(data).isNotNull();
+    Assertions.assertThat(data.getUserId()).isEqualTo(id);
+    Assertions.assertThat(data.getEmail()).isEqualTo(email);
+    Assertions.assertThat(data.getRole()).isEqualTo(role.name());
   }
 
   /**

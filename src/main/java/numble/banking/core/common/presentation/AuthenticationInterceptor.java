@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.UnAuthorizedException;
 import numble.banking.core.token.JwtTokenProvider;
+import numble.banking.core.token.TokenData;
 import numble.banking.core.user.command.domain.Role;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
@@ -40,10 +41,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     jwtTokenProvider.validateToken(token);
 
-    String userRole = jwtTokenProvider.getUserRole(token);
+    TokenData tokenData = jwtTokenProvider.getTokenData(token);
 
     // 토큰에 들어온 유저의 권한이 해당 API에 요구되는 권한에 속하는지 확인.
-    if (Arrays.asList(auth.role()).contains(Role.valueOf(userRole))) return true;
+    if (Arrays.asList(auth.role()).contains(Role.valueOf(tokenData.getRole()))) return true;
 
     throw new UnAuthorizedException(ErrorCode.CERTIFICATION_TYPE_NOT_MATCH);
   }

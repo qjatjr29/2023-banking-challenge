@@ -51,30 +51,17 @@ public class JwtTokenProvider {
         refreshTokenExpirationTime);
   }
 
-  public String getUserEmail(String token) {
-    if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
-
-    Claims claims = getClaims(token);
-    return claims.get("email", String.class);
-  }
-
-  public Long getUserId(String token) {
-    if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
-    Claims claims = getClaims(token);
-    return claims.get("userId", Long.class);
-  }
-
-  public String getUserRole(String token) {
-    if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
-    Claims claims = getClaims(token);
-    return claims.get("role", String.class);
+  public TokenData getTokenData(String token) {
+    return TokenData.from(getUserId(token),
+        getUserEmail(token),
+        getUserRole(token));
   }
 
   public void validateToken(String token) {
     if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
 
     try {
-      if(!isTokenExpired(token)) throw new UnAuthorizedException(ErrorCode.UNAUTHORIZED);
+      if(isExpiredToken(token)) throw new UnAuthorizedException(ErrorCode.UNAUTHORIZED);
     } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
       log.info("Invalid JWT Token", e);
       throw new UnAuthorizedException(ErrorCode.INVALID_VERIFICATION_TOKEN);
@@ -123,7 +110,26 @@ public class JwtTokenProvider {
         .getBody();
   }
 
-  private Boolean isTokenExpired(String token) {
+  private String getUserEmail(String token) {
+    if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
+
+    Claims claims = getClaims(token);
+    return claims.get("email", String.class);
+  }
+
+  private Long getUserId(String token) {
+    if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
+    Claims claims = getClaims(token);
+    return claims.get("userId", Long.class);
+  }
+
+  private String getUserRole(String token) {
+    if(!isExistToken(token)) throw new BusinessException(ErrorCode.TOKEN_NOT_EXISTS);
+    Claims claims = getClaims(token);
+    return claims.get("role", String.class);
+  }
+
+  private Boolean isExpiredToken(String token) {
     Date expiration = getClaims(token).getExpiration();
     return expiration.before(new Date());
   }

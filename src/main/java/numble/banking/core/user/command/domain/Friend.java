@@ -18,13 +18,17 @@ public class Friend {
   @Column(name = "friend_name")
   private String name;
 
-  private Friend(final Long friendId, final String name) {
+  @Column(name = "friend_phone")
+  private String phone;
+
+  private Friend(final Long friendId, final String name, final String phone) {
     this.friendId = friendId;
     this.name = name;
+    this.phone = phone;
   }
 
   public static Friend of(final User user) {
-    return new Friend(user.getId(), user.getName());
+    return new Friend(user.getId(), user.getName(), user.getPhone());
   }
 
   @Override

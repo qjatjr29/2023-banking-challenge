@@ -206,9 +206,11 @@ class UserControllerTest extends BaseControllerTest {
             getDocumentResponse(),
             responseFields(
                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("유저 아이디"),
                 fieldWithPath("content.[].name").type(JsonFieldType.STRING).description("이름"),
                 fieldWithPath("content.[].email").type(JsonFieldType.STRING).description("이메일"),
                 fieldWithPath("content.[].phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
+                fieldWithPath("content.[].isFriend").type(JsonFieldType.BOOLEAN).description("친구 여부"),
 
                 fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
                 fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),
@@ -264,9 +266,11 @@ class UserControllerTest extends BaseControllerTest {
             getDocumentResponse(),
             responseFields(
                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("유저 아이디"),
                 fieldWithPath("content.[].name").type(JsonFieldType.STRING).description("이름"),
                 fieldWithPath("content.[].email").type(JsonFieldType.STRING).description("이메일"),
                 fieldWithPath("content.[].phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
+                fieldWithPath("content.[].isFriend").type(JsonFieldType.BOOLEAN).description("친구 여부"),
 
                 fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
                 fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),

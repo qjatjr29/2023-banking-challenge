@@ -11,6 +11,7 @@ import numble.banking.core.user.command.application.SignupRequest;
 import numble.banking.core.user.command.application.UserDetailResponse;
 import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Role;
+import numble.banking.core.user.query.application.UserQueryService;
 import numble.banking.core.user.query.dao.UserDao;
 import numble.banking.core.user.query.dto.UserQueryDetailResponse;
 import numble.banking.core.user.query.dto.UserSummaryResponse;
@@ -32,11 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
-  private final UserDao userDao;
+//  private final UserDao userDao;
+  private final UserQueryService userQueryService;
 
-  public UserController(UserService userService, UserDao userDao) {
+  public UserController(UserService userService,
+      UserQueryService userQueryService) {
     this.userService = userService;
-    this.userDao = userDao;
+    this.userQueryService = userQueryService;
   }
 
   @PostMapping
@@ -56,8 +59,7 @@ public class UserController {
   @Auth(role = {Role.USER, Role.MANAGER})
   @GetMapping("/me")
   public ResponseEntity<UserQueryDetailResponse> getMyInfo(@LoginUser Long loginId) {
-    UserQueryDetailResponse userQueryDetailResponse = userDao.findDetailById(loginId)
-        .orElseThrow(() -> new NotFoundException(ErrorCode.ROLE_NOT_EXISTS));
+    UserQueryDetailResponse userQueryDetailResponse = userQueryService.getMyInfo(loginId);
 
     return ResponseEntity.ok(userQueryDetailResponse);
   }
@@ -67,9 +69,8 @@ public class UserController {
   public ResponseEntity<Page<UserSummaryResponse>> getUsers(
       @PageableDefault(page = 0, size = 15) Pageable pageable,
       @LoginUser Long userId) {
-
-    Page<UserSummaryResponse> summaryList = userDao.findSummaryList(userId, pageable);
-    return ResponseEntity.ok(summaryList);
+    Page<UserSummaryResponse> userList = userQueryService.getUserList(userId, pageable);
+    return ResponseEntity.ok(userList);
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})
@@ -78,7 +79,7 @@ public class UserController {
       @LoginUser Long userId,
       @PageableDefault(page = 0, size = 15) Pageable pageable) {
 
-    Page<UserSummaryResponse> summaryList = userDao.findAllByName(name, userId, pageable);
+    Page<UserSummaryResponse> summaryList = userQueryService.getUserListByName(userId, name, pageable);
     return ResponseEntity.ok(summaryList);
   }
 

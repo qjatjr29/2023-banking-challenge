@@ -17,4 +17,15 @@ public class UserQueryDetailResponse {
   private String phone;
   private Address address;
 
+  public UserQueryDetailResponse(final UserData userData) {
+    this.loginId = userData.getLoginId();
+    this.name = userData.getName();
+    this.email = userData.getEmail();
+    this.phone = userData.getPhone();
+    this.address = userData.getAddress();
+  }
+
+  public static UserQueryDetailResponse of(final UserData userData) {
+    return new UserQueryDetailResponse(userData);
+  }
 }

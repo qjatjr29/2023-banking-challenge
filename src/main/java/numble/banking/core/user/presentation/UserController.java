@@ -1,18 +1,17 @@
 package numble.banking.core.user.presentation;
 
 import java.net.URI;
-import java.util.List;
 import javax.validation.Valid;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.common.presentation.Auth;
 import numble.banking.core.common.presentation.LoginUser;
+import numble.banking.core.user.command.application.FriendResponse;
 import numble.banking.core.user.command.application.SignupRequest;
 import numble.banking.core.user.command.application.UserDetailResponse;
 import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Role;
 import numble.banking.core.user.query.dao.UserDao;
-import numble.banking.core.user.query.dto.UserData;
 import numble.banking.core.user.query.dto.UserQueryDetailResponse;
 import numble.banking.core.user.query.dto.UserSummaryResponse;
 import org.springframework.data.domain.Page;
@@ -21,6 +20,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +44,13 @@ public class UserController {
     UserDetailResponse userDetail = userService.signup(request);
 
     return ResponseEntity.created(URI.create("")).body(userDetail);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @PostMapping("/friend/{friendId}")
+  public ResponseEntity<FriendResponse> follow(@PathVariable Long friendId, @LoginUser Long userId) {
+    FriendResponse response = userService.follow(userId, friendId);
+    return ResponseEntity.ok(response);
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})

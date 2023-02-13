@@ -7,6 +7,7 @@ import numble.banking.core.common.error.exception.ConflictException;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.user.command.domain.Address;
+import numble.banking.core.user.command.domain.Friend;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,19 @@ public class UserService {
     userRepository.save(user);
 
     return UserDetailResponse.of(user);
+  }
+
+  public FriendResponse follow(Long userId, Long friendId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+    User friendUser = userRepository.findById(friendId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+    Friend friend = Friend.of(friendUser);
+    user.follow(friend);
+
+    return FriendResponse.of(friend);
   }
 
   public void delete(Long userId) {

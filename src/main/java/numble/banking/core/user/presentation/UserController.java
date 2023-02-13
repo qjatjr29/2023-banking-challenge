@@ -13,6 +13,7 @@ import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Role;
 import numble.banking.core.user.query.application.UserQueryService;
 import numble.banking.core.user.query.dao.UserDao;
+import numble.banking.core.user.query.dto.FriendDetailResponse;
 import numble.banking.core.user.query.dto.UserQueryDetailResponse;
 import numble.banking.core.user.query.dto.UserSummaryResponse;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
   private final UserService userService;
-//  private final UserDao userDao;
   private final UserQueryService userQueryService;
 
   public UserController(UserService userService,
@@ -81,6 +81,14 @@ public class UserController {
 
     Page<UserSummaryResponse> summaryList = userQueryService.getUserListByName(userId, name, pageable);
     return ResponseEntity.ok(summaryList);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/friends")
+  public ResponseEntity<Page<FriendDetailResponse>> getFriendList(@LoginUser Long userId,
+      @PageableDefault(page = 0, size = 10) Pageable pageable) {
+    Page<FriendDetailResponse> friendList = userQueryService.getFriendList(userId, pageable);
+    return ResponseEntity.ok(friendList);
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})

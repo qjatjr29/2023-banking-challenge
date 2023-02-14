@@ -50,7 +50,7 @@ public class UserQueryService {
   public Page<UserSummaryResponse> getUserListByName(Long id, String name, Pageable pageable) {
     Page<User> userList = userDao.findAllByName(name, id, pageable);
 
-    UserData userData = userDao.findById(id)
+    User userData = userDao.findUserById(id)
         .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
     return userList.map(user ->
@@ -62,16 +62,16 @@ public class UserQueryService {
             ));
   }
 
-  public Page<FriendDetailResponse> getFriendList(Long userId, Pageable pageable) {
-    UserData userData = userDao.findById(userId)
+  public Page<FriendDetailResponse> getFriendList(Long id, Pageable pageable) {
+    User userData = userDao.findUserById(id)
         .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
     Set<Friend> friends = userData.getFriendSet();
 
-    List<FriendDetailResponse> collect = friends.stream()
+    List<FriendDetailResponse> friendList = friends.stream()
         .map(FriendDetailResponse::of)
         .collect(Collectors.toList());
 
-    return new PageImpl<>(collect, pageable, collect.size());
+    return new PageImpl<>(friendList, pageable, friendList.size());
   }
 }

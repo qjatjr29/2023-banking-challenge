@@ -20,6 +20,6 @@ public class OpenAccountRequest {
   private String accountName;
 
   @NotBlank
-  private Bank bankName;
+  private Bank bank;
 
 }

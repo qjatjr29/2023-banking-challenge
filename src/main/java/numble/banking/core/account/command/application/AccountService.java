@@ -22,7 +22,7 @@ public class AccountService {
     this.userRepository = userRepository;
   }
 
-  public AccountDetailResponse createAccount(Long userId, OpenAccountRequest request) {
+  public AccountDetailResponse openAccount(Long userId, OpenAccountRequest request) {
 
     if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
@@ -30,7 +30,7 @@ public class AccountService {
         .userId(userId)
         .accountType(request.getAccountType())
         .accountName(request.getAccountName())
-        .bank(request.getBankName())
+        .bank(request.getBank())
         .build();
 
     Account save = accountRepository.save(account);

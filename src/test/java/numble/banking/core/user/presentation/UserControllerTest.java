@@ -14,10 +14,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.stream.Stream;
 import numble.banking.core.common.error.ErrorCode;
-import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.token.JwtTokenProvider;
 import numble.banking.core.token.TokenData;
 import numble.banking.core.user.command.application.SignupRequest;
+import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Address;
 import numble.banking.core.user.command.domain.Role;
 import numble.banking.core.user.command.domain.User;
@@ -41,6 +41,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class UserControllerTest extends BaseControllerTest {
 
   static final String AUTHORIZATION_HEADER = "Authorization";
+
+  @Autowired
+  UserService userService;
 
   @Autowired
   UserRepository userRepository;
@@ -298,6 +301,91 @@ class UserControllerTest extends BaseControllerTest {
             )
         ));
   }
+
+  @Test
+  @DisplayName("친구 추가 테스트")
+  void follow() throws Exception {
+
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    User friend = generateUser("friend2", "friend12!", "friend@gmail.com", "010-1234-1234");
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    ResultActions result = mockMvc.perform(post("/users/friend/{id}", friend.getId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andExpect(jsonPath("friendId").value(friend.getId()))
+        .andDo(document("유저 - 친구 추가 성공",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("friendId").type(JsonFieldType.NUMBER).description("친구 아이디"),
+                fieldWithPath("name").type(JsonFieldType.STRING).description("친구 이름")
+            )
+        ));
+  }
+
+  @Test
+  @DisplayName("친구 조회 테스트")
+  void getFriendList() throws Exception {
+
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    User friend1 = generateUser("friend2", "friend12!", "friend@gmail.com", "010-1234-1234");
+    User friend2 = generateUser("friend3", "friend123!", "friend3@gmail.com", "010-3234-1234");
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    userService.follow(user.getId(), friend1.getId());
+    userService.follow(user.getId(), friend2.getId());
+    ResultActions result = mockMvc.perform(get("/users/friends")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("유저 - 친구 목록 조회 성공",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("친구 아이디"),
+                fieldWithPath("content.[].name").type(JsonFieldType.STRING).description("친구 이름"),
+                fieldWithPath("content.[].phone").type(JsonFieldType.STRING).description("친구 휴대폰 번호"),
+
+                fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
+                fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),
+                fieldWithPath("pageable.sort.empty").type(JsonFieldType.BOOLEAN).description("정렬 empty"),
+                fieldWithPath("pageable.sort.unsorted").type(JsonFieldType.BOOLEAN).description("정렬 X 여부"),
+                fieldWithPath("pageable.sort.sorted").type(JsonFieldType.BOOLEAN).description("정렬 O 여부"),
+
+                fieldWithPath("pageable.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
+                fieldWithPath("pageable.pageSize").type(JsonFieldType.NUMBER).description("한 페이지에 나오는 원소 수"),
+                fieldWithPath("pageable.offset").type(JsonFieldType.NUMBER).description(""),
+                fieldWithPath("pageable.unpaged").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("pageable.paged").type(JsonFieldType.BOOLEAN).description(""),
+
+                fieldWithPath("totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                fieldWithPath("totalElements").type(JsonFieldType.NUMBER).description("전체 검색 갯수"),
+                fieldWithPath("last").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("size").type(JsonFieldType.NUMBER).description("한 페이지 사이즈"),
+                fieldWithPath("number").type(JsonFieldType.NUMBER).description(""),
+                fieldWithPath("sort.empty").type(JsonFieldType.BOOLEAN).description("정렬 empty"),
+                fieldWithPath("sort.unsorted").type(JsonFieldType.BOOLEAN).description("정렬 X 여부"),
+                fieldWithPath("sort.sorted").type(JsonFieldType.BOOLEAN).description("정렬 O 여부"),
+                fieldWithPath("first").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("empty").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("numberOfElements").type(JsonFieldType.NUMBER).description("한 페이지의 원소 수")
+            )
+        ));
+  }
+
 
   @Test
   @DisplayName("유저 정보 삭제 테스트")

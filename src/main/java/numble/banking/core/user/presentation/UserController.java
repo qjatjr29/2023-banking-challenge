@@ -2,8 +2,6 @@ package numble.banking.core.user.presentation;
 
 import java.net.URI;
 import javax.validation.Valid;
-import numble.banking.core.common.error.ErrorCode;
-import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.common.presentation.Auth;
 import numble.banking.core.common.presentation.LoginUser;
 import numble.banking.core.user.command.application.FriendResponse;
@@ -12,7 +10,6 @@ import numble.banking.core.user.command.application.UserDetailResponse;
 import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Role;
 import numble.banking.core.user.query.application.UserQueryService;
-import numble.banking.core.user.query.dao.UserDao;
 import numble.banking.core.user.query.dto.FriendDetailResponse;
 import numble.banking.core.user.query.dto.UserQueryDetailResponse;
 import numble.banking.core.user.query.dto.UserSummaryResponse;
@@ -50,7 +47,7 @@ public class UserController {
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})
-  @PostMapping("/friend/{friendId}")
+  @PostMapping("/friends/{friendId}")
   public ResponseEntity<FriendResponse> follow(@PathVariable Long friendId, @LoginUser Long userId) {
     FriendResponse response = userService.follow(userId, friendId);
     return ResponseEntity.ok(response);

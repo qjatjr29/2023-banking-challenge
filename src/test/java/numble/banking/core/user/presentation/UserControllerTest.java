@@ -313,7 +313,7 @@ class UserControllerTest extends BaseControllerTest {
     String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
 
     // when
-    ResultActions result = mockMvc.perform(post("/users/friend/{id}", friend.getId())
+    ResultActions result = mockMvc.perform(post("/users/friends/{id}", friend.getId())
         .contentType(MediaType.APPLICATION_JSON)
         .header(AUTHORIZATION_HEADER, accessToken));
 

@@ -1,5 +1,6 @@
 package numble.banking.core.account.presentation;
 
+import java.net.URI;
 import numble.banking.core.account.command.application.AccountDetailResponse;
 import numble.banking.core.account.command.application.AccountService;
 import numble.banking.core.account.command.application.OpenAccountRequest;
@@ -24,11 +25,11 @@ public class AccountController {
 
   @Auth(role = {Role.USER, Role.MANAGER})
   @PostMapping
-  public ResponseEntity<AccountDetailResponse> createAccount(@RequestBody OpenAccountRequest request, @LoginUser Long userId) {
+  public ResponseEntity<AccountDetailResponse> openAccount(@RequestBody OpenAccountRequest request, @LoginUser Long userId) {
 
-    AccountDetailResponse response = accountService.createAccount(userId, request);
+    AccountDetailResponse response = accountService.openAccount(userId, request);
 
-    return ResponseEntity.ok().body(response);
+    return ResponseEntity.created(URI.create("")).body(response);
   }
 
 }

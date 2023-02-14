@@ -11,10 +11,12 @@ import numble.banking.core.user.command.domain.Friend;
 @AllArgsConstructor
 public class FriendDetailResponse {
 
+  private Long id;
   private String name;
   private String phone;
 
   private FriendDetailResponse(final Friend friend) {
+    this.id = friend.getFriendId();
     this.name = friend.getName();
     this.phone = friend.getPhone();
   }

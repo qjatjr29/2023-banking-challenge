@@ -41,11 +41,11 @@ public class Friend {
     }
     Friend friend = (Friend) o;
     return Objects.equals(friendId, friend.friendId) && Objects.equals(name,
-        friend.name);
+        friend.name) && Objects.equals(phone, friend.phone);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(friendId, name);
+    return Objects.hash(friendId, name, phone);
   }
 }

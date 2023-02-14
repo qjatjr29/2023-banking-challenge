@@ -21,4 +21,7 @@ public interface UserDao extends JpaRepository<UserData, Long> {
   @Query("SELECT u FROM User u WHERE u.id <> :id and u.name = :name")
   Page<User> findAllByName(@Param("name") String name, @Param("id") Long userId, Pageable pageable);
 
+  @Query("SELECT u FROM User u WHERE u.id = :id")
+  Optional<User> findUserById(@Param("id") Long id);
+
 }

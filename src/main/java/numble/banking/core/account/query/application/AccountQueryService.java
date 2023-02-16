@@ -30,12 +30,6 @@ public class AccountQueryService {
 
     Page<Account> myAccounts = accountDao.findMyAccounts(userId, pageable);
 
-    System.out.println(userId);
-
-    for (Account myAccount : myAccounts) {
-      System.out.println(myAccount.getAccountName());
-    }
-
     return myAccounts.map(AccountSummaryResponse::of);
   }
 

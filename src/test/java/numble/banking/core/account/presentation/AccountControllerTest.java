@@ -156,6 +156,45 @@ class AccountControllerTest extends BaseControllerTest {
 
   }
 
+
+  @Test
+  @DisplayName("계좌 상세 정보 조회 테스트")
+  void getMyAccount() throws Exception {
+
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+    Account account = generateAccount(user.getId(), "account1", "DEPOSIT", "우리은행");
+
+    // when
+    ResultActions result = mockMvc.perform(get("/accounts/me/{accountId}", account.getId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 계좌 상세 정보 조회 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("accountId").type(JsonFieldType.NUMBER).description("계좌 아이디"),
+                fieldWithPath("accountName").type(JsonFieldType.STRING).description("계좌 이름"),
+                fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호"),
+                fieldWithPath("accountType").type(JsonFieldType.STRING).description("계좌 타입"),
+                fieldWithPath("bank").type(JsonFieldType.STRING).description("은행"),
+                fieldWithPath("openDate").type(JsonFieldType.VARIES).description("개설 날짜"),
+                fieldWithPath("transferHistories").type(JsonFieldType.ARRAY).description("이체 내역"),
+                fieldWithPath("transferHistories.[].transferAmount").type(JsonFieldType.STRING).description("이체 금액").optional(),
+                fieldWithPath("transferHistories.[].balance").type(JsonFieldType.STRING).description("잔금").optional(),
+                fieldWithPath("transferHistories.[].isDeposit").type(JsonFieldType.BOOLEAN).description("입금인지 출금인지").optional(),
+                fieldWithPath("transferHistories.[].transferPersonName").type(JsonFieldType.STRING).description("이체 상대").optional(),
+                fieldWithPath("transferHistories.[].content").type(JsonFieldType.STRING).description("이체 내용").optional(),
+                fieldWithPath("transferHistories.[].transferTime").type(JsonFieldType.VARIES).description("이체 시간").optional()
+            )
+        ));
+
+  }
+
   private User generateUser(String loginId, String password, String email, String phone) {
 
     User user = User.builder()

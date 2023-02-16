@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import numble.banking.core.account.command.domain.AccountType;
 import numble.banking.core.account.command.domain.Bank;
 
 @Getter
@@ -14,7 +13,7 @@ import numble.banking.core.account.command.domain.Bank;
 public class OpenAccountRequest {
 
   @NotBlank
-  private AccountType accountType;
+  private String accountType;
 
   @NotBlank
   private String accountName;

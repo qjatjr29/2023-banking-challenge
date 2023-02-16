@@ -1,5 +1,6 @@
 package numble.banking.core.account.query.application;
 
+import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.query.dao.AccountDao;
@@ -31,6 +32,14 @@ public class AccountQueryService {
     Page<Account> myAccounts = accountDao.findMyAccounts(userId, pageable);
 
     return myAccounts.map(AccountSummaryResponse::of);
+  }
+
+  public AccountQueryDetailResponse getAccount(Long userId, Long accountId) {
+    if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+
+    AccountQueryDetailResponse myAccount = accountDao.findMyAccount(userId, accountId);
+
+    return myAccount;
   }
 
 

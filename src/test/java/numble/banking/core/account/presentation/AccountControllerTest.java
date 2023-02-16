@@ -40,14 +40,14 @@ class AccountControllerTest extends BaseControllerTest {
   @Autowired
   JwtTokenProvider jwtTokenProvider;
 
-  AccountType accountType;
+  String accountType;
   String accountName;
   Bank bank;
 
   @BeforeEach
   void setup() {
     accountName = "beomsic's account";
-    accountType = AccountType.DEPOSIT;
+    accountType = "DEPOSIT";
     bank = Bank.우리은행;
   }
 

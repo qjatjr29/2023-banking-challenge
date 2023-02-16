@@ -6,5 +6,10 @@ import lombok.Getter;
 public enum AccountType {
   DEPOSIT,
   SAVINGS,
-  STOCK
+  STOCK;
+
+  public static AccountType getAccountType(String type) {
+    return AccountType.valueOf(type.toUpperCase());
+  }
+
 }

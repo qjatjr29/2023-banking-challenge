@@ -2,8 +2,10 @@ package numble.banking.core.account.command.application;
 
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.command.domain.AccountRepository;
+import numble.banking.core.account.command.domain.AccountType;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.NotFoundException;
+import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,11 +26,13 @@ public class AccountService {
 
   public AccountDetailResponse openAccount(Long userId, OpenAccountRequest request) {
 
-    if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
     Account account = Account.builder()
         .userId(userId)
-        .accountType(request.getAccountType())
+        .ownerName(user.getName())
+        .accountType(AccountType.getAccountType(request.getAccountType()))
         .accountName(request.getAccountName())
         .bank(request.getBank())
         .build();

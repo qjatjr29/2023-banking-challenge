@@ -3,7 +3,7 @@ package numble.banking.core.user.command.application;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
-import numble.banking.core.common.error.exception.BadRequestException;
+import java.util.Optional;
 import numble.banking.core.common.error.exception.ConflictException;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
@@ -46,7 +46,6 @@ class UserServiceTest {
   class signup {
 
     SignupRequest request;
-    User user;
 
     @BeforeEach
     void setup() {
@@ -108,6 +107,23 @@ class UserServiceTest {
     }
   }
 
+  @Test
+  @DisplayName("친구 사이 확인 테스트")
+  void areTheyFriend() {
 
+    // given
+    given(userRepository.findById(1L))
+        .willReturn(Optional.of(User.builder().id(1L).build()));
 
+    given(userRepository.findById(2L))
+        .willReturn(Optional.of(User.builder().id(2L).build()));
+    // when
+    userService.follow(1L, 2L);
+
+    // then
+    Assertions.assertThat(userRepository
+            .findById(1L).get()
+            .areTheyFriend(2L))
+        .isTrue();
+  }
 }

@@ -86,4 +86,9 @@ public class User extends BaseEntity {
     if(friendSet.contains(friend)) throw new ConflictException(ErrorCode.FRIEND_ALREADY_EXISTED);
     friendSet.add(friend);
   }
+
+  public boolean areTheyFriend(Long friendId) {
+    return this.friendSet.stream()
+        .anyMatch(friend -> friend.getFriendId().equals(friendId));
+  }
 }

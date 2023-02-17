@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.command.domain.AccountType;
 import numble.banking.core.account.command.domain.Bank;
+import numble.banking.core.account.command.domain.Money;
 import numble.banking.core.account.command.domain.TransferHistory;
 
 @Getter
@@ -17,6 +18,7 @@ public class AccountQueryDetailResponse {
   private Long accountId;
   private String accountName;
   private String accountNumber;
+  private Money amounts;
   private AccountType accountType;
   private Bank bank;
   private LocalDate openDate;
@@ -26,6 +28,7 @@ public class AccountQueryDetailResponse {
     this.accountId = account.getId();
     this.accountName = account.getAccountName();
     this.accountNumber = account.getAccountNumber();
+    this.amounts = account.getAmounts();
     this.accountType = account.getAccountType();
     this.bank = account.getBank();
     this.openDate = LocalDate.from(account.getCreatedAt());

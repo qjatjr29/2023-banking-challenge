@@ -180,6 +180,8 @@ class AccountControllerTest extends BaseControllerTest {
                 fieldWithPath("accountId").type(JsonFieldType.NUMBER).description("계좌 아이디"),
                 fieldWithPath("accountName").type(JsonFieldType.STRING).description("계좌 이름"),
                 fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호"),
+                fieldWithPath("amounts").type(JsonFieldType.OBJECT).description("잔액 정보"),
+                fieldWithPath("amounts.money").type(JsonFieldType.NUMBER).description("잔액"),
                 fieldWithPath("accountType").type(JsonFieldType.STRING).description("계좌 타입"),
                 fieldWithPath("bank").type(JsonFieldType.STRING).description("은행"),
                 fieldWithPath("openDate").type(JsonFieldType.VARIES).description("개설 날짜"),

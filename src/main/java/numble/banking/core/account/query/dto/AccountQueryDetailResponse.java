@@ -28,7 +28,7 @@ public class AccountQueryDetailResponse {
     this.accountId = account.getId();
     this.accountName = account.getAccountName();
     this.accountNumber = account.getAccountNumber();
-    this.amounts = account.getAmounts();
+    this.amounts = account.getBalance();
     this.accountType = account.getAccountType();
     this.bank = account.getBank();
     this.openDate = LocalDate.from(account.getCreatedAt());

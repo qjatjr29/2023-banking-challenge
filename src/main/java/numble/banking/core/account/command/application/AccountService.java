@@ -1,5 +1,6 @@
 package numble.banking.core.account.command.application;
 
+import lombok.extern.slf4j.Slf4j;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.command.domain.AccountRepository;
 import numble.banking.core.account.command.domain.AccountType;
@@ -10,20 +11,24 @@ import numble.banking.core.user.command.domain.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
-@Transactional
 public class AccountService {
 
   private final AccountRepository accountRepository;
   private final UserRepository userRepository;
+  private final TransferService transferService;
 
   public AccountService(
       AccountRepository accountRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      TransferService transferService) {
     this.accountRepository = accountRepository;
     this.userRepository = userRepository;
+    this.transferService = transferService;
   }
 
+  @Transactional
   public AccountDetailResponse openAccount(Long userId, OpenAccountRequest request) {
 
     User user = userRepository.findById(userId)
@@ -41,5 +46,9 @@ public class AccountService {
     save.generateAccountNumber();
 
     return AccountDetailResponse.of(save);
+  }
+
+  public TransferResponse transfer(Long userId, TransferRequest request) {
+    return transferService.transferMoney(userId, request);
   }
 }

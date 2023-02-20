@@ -3,12 +3,14 @@ package numble.banking.core.account.presentation;
 import java.net.URI;
 import numble.banking.core.account.command.application.AccountDetailResponse;
 import numble.banking.core.account.command.application.AccountService;
+import numble.banking.core.account.command.application.TransferRequest;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.application.OpenAccountRequest;
 import numble.banking.core.account.query.application.AccountQueryService;
 import numble.banking.core.common.presentation.Auth;
 import numble.banking.core.common.presentation.LoginUser;
+import numble.banking.core.account.command.application.TransferResponse;
 import numble.banking.core.user.command.domain.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +43,15 @@ public class AccountController {
     AccountDetailResponse response = accountService.openAccount(userId, request);
 
     return ResponseEntity.created(URI.create("")).body(response);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @PostMapping("/transfer")
+  public ResponseEntity<TransferResponse> transferUsingAccountId(@LoginUser Long userId, @RequestBody TransferRequest request) {
+
+    TransferResponse response = accountService.transfer(userId, request);
+
+    return ResponseEntity.ok().body(response);
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})

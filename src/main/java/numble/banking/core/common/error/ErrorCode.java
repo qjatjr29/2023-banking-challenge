@@ -22,7 +22,14 @@ public enum ErrorCode {
 
   EXPIRED_VERIFICATION_TOKEN(403, "AUTH-001", "인증 토큰이 만료된 경우"),
   INVALID_VERIFICATION_TOKEN(403, "AUTH-002", "토큰이 유효하지 않은 경우"),
-  CERTIFICATION_TYPE_NOT_MATCH(403, "AUTH-003", "인증 타입이 일치하지 않은 경우");
+  CERTIFICATION_TYPE_NOT_MATCH(403, "AUTH-003", "인증 타입이 일치하지 않은 경우"),
+
+  ACCOUNT_NOT_FOUND(404, "ACCOUNT-001", "찾는 계좌가 없는 경우"),
+  WRONG_AMOUNT_INPUT_VALUE(400, "ACCOUNT-002", "잘못된 돈이 들어온 경우"),
+  OVER_AMOUNT_CURRENT_VALUE(400, "ACCOUNT-003", "현재 계좌에 있는 잔액보다 더 많은 돈을 출금하는 경우"),
+  INSUFFICIENT_QUALIFICATIONS_FRIEND(400, "ACCOUNT-004", "친구 사이가 아닌 경우"),
+  FAILURE_GET_LOCK(500, "ACCOUNT-005", "락 획득 실패");
+
 
   int statusCode;
   String resultCode;

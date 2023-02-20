@@ -9,6 +9,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,6 +23,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import numble.banking.core.account.command.application.MoneyConverter;
 import numble.banking.core.common.domain.BaseEntity;
+import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.common.error.exception.BadRequestException;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -54,7 +57,7 @@ public class Account extends BaseEntity {
   @Column(name = "amounts")
   @Convert(converter = MoneyConverter.class)
   @Builder.Default
-  private Money amounts = new Money(0L);
+  private Money balance = new Money(0L);
 
   @Column(name = "account_type")
   @Enumerated(EnumType.STRING)
@@ -67,7 +70,7 @@ public class Account extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private Bank bank;
 
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "transfer_history", joinColumns = @JoinColumn(name = "account_id"))
   @OrderColumn(name = "history_index")
   @Builder.Default
@@ -88,8 +91,40 @@ public class Account extends BaseEntity {
     setAccountNumber(nextNumber.toString());
   }
 
+  public void deposit(Money amounts) {
+    if(amounts.getMoney() < 0) throw new BadRequestException(ErrorCode.WRONG_AMOUNT_INPUT_VALUE);
+    setMoney(amounts.getMoney());
+  }
+
+  public void withdrawal(Money amounts) {
+    if(amounts.getMoney() < 0) throw new BadRequestException(ErrorCode.WRONG_AMOUNT_INPUT_VALUE);
+    if(!canSendMoney(amounts.getMoney())) throw new BadRequestException(ErrorCode.OVER_AMOUNT_CURRENT_VALUE);
+
+    setMoney(-amounts.getMoney());
+  }
+
+  public void addTransferHistory(Money amounts, String fromName, String content, Boolean isDeposit) {
+
+    TransferHistory history = TransferHistory.builder()
+        .transferAmount(amounts)
+        .balance(this.balance)
+        .content(content)
+        .transferPersonName(fromName)
+        .isDeposit(isDeposit)
+        .build();
+
+    this.transferHistories.add(history);
+  }
+
   private void setAccountNumber(String accountNumber) {
     this.accountNumber = accountNumber;
   }
 
+  private void setMoney(Long amount) {
+    this.balance = this.balance.transfer(amount);
+  }
+
+  private boolean canSendMoney(Long withdrawalMoney) {
+    return this.balance.getMoney() - withdrawalMoney >= 0;
+  }
 }

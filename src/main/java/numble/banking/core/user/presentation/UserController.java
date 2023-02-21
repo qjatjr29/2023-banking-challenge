@@ -96,4 +96,12 @@ public class UserController {
     return ResponseEntity.noContent().build();
   }
 
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @DeleteMapping("/friends/{friendId}")
+  public ResponseEntity<Void> deleteFriend(@LoginUser Long userId, @PathVariable Long friendId) {
+
+    userService.deleteFriend(userId, friendId);
+    return ResponseEntity.noContent().build();
+  }
+
 }

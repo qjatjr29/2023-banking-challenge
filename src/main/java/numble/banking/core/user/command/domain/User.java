@@ -22,7 +22,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import numble.banking.core.common.domain.BaseEntity;
 import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.common.error.exception.BadRequestException;
 import numble.banking.core.common.error.exception.ConflictException;
+import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.user.command.application.PasswordEncryptor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -90,5 +92,10 @@ public class User extends BaseEntity {
   public boolean areTheyFriend(Long friendId) {
     return this.friendSet.stream()
         .anyMatch(friend -> friend.getFriendId().equals(friendId));
+  }
+
+  public void deleteFriend(Long friendId) {
+    if(!areTheyFriend(friendId)) throw new BadRequestException(ErrorCode.INSUFFICIENT_QUALIFICATIONS_FRIEND);
+    friendSet.removeIf((friend -> friend.getFriendId().equals(friendId)));
   }
 }

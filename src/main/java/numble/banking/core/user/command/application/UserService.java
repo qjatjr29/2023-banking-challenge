@@ -3,6 +3,7 @@ package numble.banking.core.user.command.application;
 import java.util.ArrayList;
 import java.util.List;
 import numble.banking.core.common.error.ErrorField;
+import numble.banking.core.common.error.exception.BadRequestException;
 import numble.banking.core.common.error.exception.ConflictException;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.NotFoundException;
@@ -66,6 +67,12 @@ public class UserService {
         .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
     userRepository.delete(user);
+  }
+
+  public void deleteFriend(Long userId, Long friendId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    user.deleteFriend(friendId);
   }
 
 

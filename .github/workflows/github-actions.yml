@@ -41,31 +41,43 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
           docker push ${{ secrets.DOCKER_REPO }}
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-
-    services:
-      redis:
-        image: redis
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Deploy Service
+        uses: appleboy/ssh-action@master
         with:
-          java-version: ${{ secrets.JAVA_VERSION }}
-          distribution: 'temurin'
+          username: ${{ secrets.AWS_USERNAME }}
+          password: ${{ secrets.AWS_PASSWORD }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: 22
+          script: |
+            sudo docker rm -f ${docker ps -qa}
+            sudo docker pull ${{ secrets.DOCKER_REPO }}
+            docker-compose up -d
+            docker image prune -f    
 
-      - name: Make test application.yml
-        run: |
-          cd ./src/test/resources
-          touch ./application.yml
-          echo "$APPLICATION" >> ./application.yml
-        shell: bash
-        env:
-          APPLICATION: ${{ secrets.TEST_APPLICATION }}
+#  test:
+#    needs: build
+#    runs-on: ubuntu-latest
+#
+#    services:
+#      redis:
+#        image: redis
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Set up JDK 11
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: ${{ secrets.JAVA_VERSION }}
+#          distribution: 'temurin'
+#
+#      - name: Make test application.yml
+#        run: |
+#          cd ./src/test/resources
+#          touch ./application.yml
+#          echo "$APPLICATION" >> ./application.yml
+#        shell: bash
+#        env:
+#          APPLICATION: ${{ secrets.TEST_APPLICATION }}
 #      - name: Grant execute permission for gradlew
 #        run: chmod +x gradlew
 #      - name: Test with Gradle
@@ -103,19 +115,19 @@ jobs:
 #          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}
 #          docker push ${{ secrets.DOCKER_REPO }}
 
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy Service
-        uses: appleboy/ssh-action@master
-        with:
-          username: ${{ secrets.AWS_USERNAME }}
-          password: ${{ secrets.AWS_PASSWORD }}
-          host: ${{ secrets.DEPLOY_HOST }}
-          port: 22
-          script: |
-            sudo docker rm -f ${docker ps -qa}
-            sudo docker pull ${{ secrets.DOCKER_REPO }}
-            docker-compose up -d
-            docker image prune -f
+#  deploy:
+#    needs: test
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Deploy Service
+#        uses: appleboy/ssh-action@master
+#        with:
+#          username: ${{ secrets.AWS_USERNAME }}
+#          password: ${{ secrets.AWS_PASSWORD }}
+#          host: ${{ secrets.DEPLOY_HOST }}
+#          port: 22
+#          script: |
+#            sudo docker rm -f ${docker ps -qa}
+#            sudo docker pull ${{ secrets.DOCKER_REPO }}
+#            docker-compose up -d
+#            docker image prune -f

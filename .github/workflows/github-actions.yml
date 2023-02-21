@@ -1,0 +1,122 @@
+name: github-actions
+
+on:
+  push:
+    branches: ["develop", "main"]
+  pull_request:
+    branches: ["develop", "main"]
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+    steps:
+      - uses: actions/checkout@v3
+        
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ secrets.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Make application.yml
+        run: |
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "$APPLICATION" >> ./application.yml
+        shell: bash
+        env:
+          APPLICATION: ${{ secrets.APPLICATION }}
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
+      - name: Docker build & push
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }} .
+          docker push ${{ secrets.DOCKER_REPO }}
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ secrets.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Make test application.yml
+        run: |
+          cd ./src/test/resources
+          touch ./application.yml
+          echo "$APPLICATION" >> ./application.yml
+        shell: bash
+        env:
+          APPLICATION: ${{ secrets.TEST_APPLICATION }}
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Test with Gradle
+        run: ./gradlew test
+  package:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ secrets.JAVA_VERSION }}
+          distribution: 'temurin'
+      - name: Make application.yml
+        run: |
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "$APPLICATION" >> ./application.yml
+          ls -al
+        shell: bash
+        env:
+          APPLICATION: ${{ secrets.APPLICATION }}
+          
+      - name: Gran execute permission for gradlew
+        run: chmod +x gradlew
+        
+      - name: Build with Gradle
+        run: ./gradlew build --exclude-task test
+
+      - name: Docker build & push
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}
+          docker push ${{ secrets.DOCKER_REPO }}
+
+  deploy:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy Service
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{ secrets.AWS_USERNAME }}
+          password: ${{ secrets.AWS_PASSWORD }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: 22
+          script: |
+            sudo docker rm -f ${docker ps -qa}
+            sudo docker pull ${{ secrets.DOCKER_REPO }}
+            docker-compose up -d
+            docker image prune -f

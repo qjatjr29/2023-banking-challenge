@@ -73,4 +73,13 @@ public class AccountController {
     return ResponseEntity.ok().body(response);
   }
 
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/{friendId}")
+  public ResponseEntity<Page<AccountSummaryResponse>> getFriendAccounts(@LoginUser Long userId, @PathVariable Long friendId, @PageableDefault(page = 0, size = 5) Pageable pageable) {
+
+    Page<AccountSummaryResponse> response = accountQueryService.getFriendAccountList(userId, friendId, pageable);
+
+    return ResponseEntity.ok().body(response);
+  }
+
 }

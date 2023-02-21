@@ -5,7 +5,9 @@ import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.query.dao.AccountDao;
 import numble.banking.core.common.error.ErrorCode;
+import numble.banking.core.common.error.exception.BadRequestException;
 import numble.banking.core.common.error.exception.NotFoundException;
+import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +42,19 @@ public class AccountQueryService {
     AccountQueryDetailResponse myAccount = accountDao.findMyAccount(userId, accountId);
 
     return myAccount;
+  }
+
+
+  public Page<AccountSummaryResponse> getFriendAccountList(Long userId, Long friendId, Pageable pageable) {
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+    if(!user.areTheyFriend(friendId))  throw new BadRequestException(ErrorCode.INSUFFICIENT_QUALIFICATIONS_FRIEND);
+
+    Page<Account> friendAccounts = accountDao.findFriendAccounts(friendId, pageable);
+
+    return friendAccounts.map(AccountSummaryResponse::of);
   }
 
 

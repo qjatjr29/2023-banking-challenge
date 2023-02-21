@@ -16,4 +16,7 @@ public interface AccountDao extends JpaRepository<AccountData, Long> {
 
   @Query("SELECT ac FROM Account ac WHERE ac.userId = :userId and ac.id = :accountId")
   AccountQueryDetailResponse findMyAccount(@Param("userId") Long userId, @Param("accountId") Long accountId);
+
+  @Query("SELECT ac FROM Account ac WHERE ac.userId = :friendId")
+  Page<Account> findFriendAccounts(@Param("friendId") Long friendId, Pageable pageable);
 }

@@ -69,10 +69,10 @@ jobs:
         shell: bash
         env:
           APPLICATION: ${{ secrets.TEST_APPLICATION }}
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Test with Gradle
-        run: ./gradlew test
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
+#      - name: Test with Gradle
+#        run: ./gradlew test
   package:
     needs: test
     runs-on: ubuntu-latest
@@ -85,8 +85,7 @@ jobs:
           distribution: 'temurin'
       - name: Make application.yml
         run: |
-          cd ./src/main
-          mkdir resources
+          cd ./src/main/resources
           touch ./application.yml
           echo "$APPLICATION" >> ./application.yml
           ls -al

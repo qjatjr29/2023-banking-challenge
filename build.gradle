@@ -27,6 +27,7 @@ dependencies {
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
 	implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
 	implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.16.8'
+	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '2.8.6'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	runtimeOnly 'com.h2database:h2'
@@ -35,6 +36,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation group: 'org.springframework.restdocs', name: 'spring-restdocs-mockmvc', version: '2.0.4.RELEASE'
+	testImplementation group: 'org.springframework.kafka', name: 'spring-kafka-test', version: '2.8.8'
 
 }
 

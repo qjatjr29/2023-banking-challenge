@@ -104,7 +104,7 @@ jobs:
       - name: Docker build & push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f dockerfile -t ${{ secrets.DOCKER_REPO }}
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}
           docker push ${{ secrets.DOCKER_REPO }}
 
   deploy:

@@ -90,7 +90,7 @@ public class UserController {
 
   @Auth(role = {Role.USER, Role.MANAGER})
   @DeleteMapping()
-  public ResponseEntity<Void> getUsersByName(@LoginUser Long userId) {
+  public ResponseEntity<Void> deleteUser(@LoginUser Long userId) {
 
     userService.delete(userId);
     return ResponseEntity.noContent().build();

@@ -52,8 +52,7 @@ jobs:
             sudo docker rm -f ${docker ps -qa}
             sudo docker pull ${{ secrets.DOCKER_REPO }}
             docker-compose up -d
-            docker image prune -f    
-
+            docker image prune -f
 #  test:
 #    needs: build
 #    runs-on: ubuntu-latest

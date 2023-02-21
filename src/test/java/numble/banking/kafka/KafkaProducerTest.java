@@ -53,7 +53,9 @@ public class KafkaProducerTest {
     props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
-    Consumer<String, TransferCompletedEvent> consumer = new KafkaConsumer<>(props);
+    Consumer<String, TransferCompletedEvent> consumer = new KafkaConsumer<>(props,
+        new StringDeserializer(),
+        new JsonDeserializer<>(TransferCompletedEvent.class, false));
 
     TransferCompletedEvent event = new TransferCompletedEvent("testUser",
         "0000-000-000000",

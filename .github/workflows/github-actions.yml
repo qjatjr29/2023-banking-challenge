@@ -85,7 +85,8 @@ jobs:
           distribution: 'temurin'
       - name: Make application.yml
         run: |
-          cd ./src/main/resources
+          cd ./src/main
+          mkdir resources
           touch ./application.yml
           echo "$APPLICATION" >> ./application.yml
           ls -al

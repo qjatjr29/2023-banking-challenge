@@ -3,9 +3,11 @@ package numble.banking.core.account.command.application;
 import lombok.extern.slf4j.Slf4j;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.command.domain.AccountRepository;
+import numble.banking.core.account.command.domain.TransferCompletedEvent;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.BadRequestException;
 import numble.banking.core.common.error.exception.NotFoundException;
+import numble.banking.core.common.event.Events;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import org.redisson.api.RLock;
@@ -56,7 +58,7 @@ public class TransferService {
       Account toAccount = accountRepository.findById(request.getToAccountId())
           .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
 
-      checkAreTheyFriend(user, toAccount.getUserId());
+      areFriends(user, toAccount.getUserId());
 
       transactionTemplate.execute(new TransactionCallbackWithoutResult() {
         @Override
@@ -72,6 +74,23 @@ public class TransferService {
         }
       });
 
+      TransferCompletedEvent event = new TransferCompletedEvent(toAccount.getOwnerName(),
+          fromAccount.getAccountNumber(),
+          request.getAmount(),
+          fromAccount.getBalance(),
+          true,
+          fromAccount.getTransferHistories().get(fromAccount.getTransferHistories().size() - 1).getTransferTime());
+
+      Events.raise(event);
+
+      event = new TransferCompletedEvent(fromAccount.getOwnerName(),
+          toAccount.getAccountNumber(),
+          request.getAmount(),
+          toAccount.getBalance(),
+          false,
+          toAccount.getTransferHistories().get(toAccount.getTransferHistories().size() - 1).getTransferTime());
+      Events.raise(event);
+
       return TransferResponse.from(fromAccount.getOwnerName(),
           toAccount.getOwnerName(),
           fromAccount.getTransferHistories()
@@ -82,7 +101,7 @@ public class TransferService {
 
   }
 
-  private void checkAreTheyFriend(User user, Long otherUserId) {
+  private void areFriends(User user, Long otherUserId) {
     if(!user.areTheyFriend(otherUserId)) throw new BadRequestException(ErrorCode.INSUFFICIENT_QUALIFICATIONS_FRIEND);
   }
 

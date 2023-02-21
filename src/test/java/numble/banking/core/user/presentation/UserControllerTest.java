@@ -432,6 +432,33 @@ class UserControllerTest extends BaseControllerTest {
         ));
   }
 
+  @Test
+  @DisplayName("친구 삭제 테스트")
+  void deleteFriend() throws Exception {
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    User friend = generateUser("friend", "friend12!", "friend@gmail.com", "010-1111-1111");
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    userService.follow(user.getId(), friend.getId());
+    ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete("/users/friends/{friendId}", friend.getId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isNoContent())
+        .andDo(document("유저 - 친구 삭제 성공",
+            getDocumentRequest(),
+            getDocumentResponse()
+        ));
+
+    Assertions.assertThat(user.areTheyFriend(friend.getId())).isFalse();
+    Assertions.assertThat(user.getFriendSet().size()).isEqualTo(0);
+  }
+
+
   static Stream<Arguments> signupFailRequests() {
     return Stream.of(
 

@@ -27,7 +27,6 @@ import numble.banking.core.user.command.domain.UserRepository;
 import numble.banking.support.controller.BaseControllerTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -249,6 +248,67 @@ class AccountControllerTest extends BaseControllerTest {
                 fieldWithPath("content").type(JsonFieldType.STRING).description("이체 내용").optional()
             )
         ));
+  }
+
+  @Test
+  @DisplayName("친구 계좌 리스트 조회 테스트")
+  void getFriendAccounts() throws Exception {
+
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+
+    User friend = generateUser("friend1", "friend123!", "friend@gmail.com", "010-0000-0002");
+
+    // when
+    userService.follow(user.getId(), friend.getId());
+    generateAccount(friend.getId(), friend.getName(), "testAccount1", "DEPOSIT", "우리은행");
+    generateAccount(friend.getId(), friend.getName(), "testAccount2", "SAVINGS", "국민은행");
+    generateAccount(friend.getId(), friend.getName(), "testAccount3", "STOCK", "신한은행");
+
+    ResultActions result = mockMvc.perform(get("/accounts/{friendId}", friend.getId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 내 친구 계좌 조회 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+
+                fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].accountNumber").type(JsonFieldType.STRING).description("계좌 번호").optional(),
+                fieldWithPath("content.[].accountName").type(JsonFieldType.STRING).description("계좌 이름").optional(),
+                fieldWithPath("content.[].type").type(JsonFieldType.STRING).description("계좌 타입").optional(),
+                fieldWithPath("content.[].bank").type(JsonFieldType.STRING).description("은행").optional(),
+
+                fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
+                fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),
+                fieldWithPath("pageable.sort.empty").type(JsonFieldType.BOOLEAN).description("정렬 empty"),
+                fieldWithPath("pageable.sort.unsorted").type(JsonFieldType.BOOLEAN).description("정렬 X 여부"),
+                fieldWithPath("pageable.sort.sorted").type(JsonFieldType.BOOLEAN).description("정렬 O 여부"),
+
+                fieldWithPath("pageable.pageNumber").type(JsonFieldType.NUMBER).description("페이지 번호"),
+                fieldWithPath("pageable.pageSize").type(JsonFieldType.NUMBER).description("한 페이지에 나오는 원소 수"),
+                fieldWithPath("pageable.offset").type(JsonFieldType.NUMBER).description(""),
+                fieldWithPath("pageable.unpaged").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("pageable.paged").type(JsonFieldType.BOOLEAN).description(""),
+
+                fieldWithPath("totalPages").type(JsonFieldType.NUMBER).description("전체 페이지 수"),
+                fieldWithPath("totalElements").type(JsonFieldType.NUMBER).description("전체 검색 갯수"),
+                fieldWithPath("last").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("size").type(JsonFieldType.NUMBER).description("한 페이지 사이즈"),
+                fieldWithPath("number").type(JsonFieldType.NUMBER).description(""),
+                fieldWithPath("sort.empty").type(JsonFieldType.BOOLEAN).description("정렬 empty"),
+                fieldWithPath("sort.unsorted").type(JsonFieldType.BOOLEAN).description("정렬 X 여부"),
+                fieldWithPath("sort.sorted").type(JsonFieldType.BOOLEAN).description("정렬 O 여부"),
+                fieldWithPath("first").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("empty").type(JsonFieldType.BOOLEAN).description(""),
+                fieldWithPath("numberOfElements").type(JsonFieldType.NUMBER).description("한 페이지의 원소 수")
+            )
+        ));
+
   }
 
 

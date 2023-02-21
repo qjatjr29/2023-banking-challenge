@@ -63,8 +63,7 @@ jobs:
 
       - name: Make test application.yml
         run: |
-          cd ./src/test
-          mkdir resources
+          cd ./src/test/resources
           touch ./application.yml
           echo "$APPLICATION" >> ./application.yml
         shell: bash

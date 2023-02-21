@@ -12,18 +12,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import numble.banking.core.account.command.application.OpenAccountRequest;
+import numble.banking.core.account.command.application.TransferRequest;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.command.domain.AccountRepository;
 import numble.banking.core.account.command.domain.AccountType;
 import numble.banking.core.account.command.domain.Bank;
+import numble.banking.core.account.command.domain.Money;
 import numble.banking.core.token.JwtTokenProvider;
 import numble.banking.core.token.TokenData;
+import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Address;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import numble.banking.support.controller.BaseControllerTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,6 +42,9 @@ class AccountControllerTest extends BaseControllerTest {
 
   @Autowired
   UserRepository userRepository;
+
+  @Autowired
+  UserService userService;
 
   @Autowired
   JwtTokenProvider jwtTokenProvider;
@@ -82,6 +89,8 @@ class AccountControllerTest extends BaseControllerTest {
                 fieldWithPath("accountId").type(JsonFieldType.NUMBER).description("계좌 아이디"),
                 fieldWithPath("accountName").type(JsonFieldType.STRING).description("계좌 이름"),
                 fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호"),
+                fieldWithPath("balance").type(JsonFieldType.OBJECT).description("잔액 정보"),
+                fieldWithPath("balance.money").type(JsonFieldType.NUMBER).description("잔액"),
                 fieldWithPath("accountType").type(JsonFieldType.STRING).description("계좌 타입"),
                 fieldWithPath("bank").type(JsonFieldType.STRING).description("은행"),
                 fieldWithPath("openDate").type(JsonFieldType.VARIES).description("개설 날짜"),
@@ -107,9 +116,9 @@ class AccountControllerTest extends BaseControllerTest {
     String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
 
     // when
-    generateAccount(user.getId(), "testAccount1", "DEPOSIT", "우리은행");
-    generateAccount(user.getId(), "testAccount2", "SAVINGS", "국민은행");
-    generateAccount(user.getId(), "testAccount3", "STOCK", "신한은행");
+    generateAccount(user.getId(), user.getName(), "testAccount1", "DEPOSIT", "우리은행");
+    generateAccount(user.getId(), user.getName(), "testAccount2", "SAVINGS", "국민은행");
+    generateAccount(user.getId(), user.getName(), "testAccount3", "STOCK", "신한은행");
 
     ResultActions result = mockMvc.perform(get("/accounts/me")
         .contentType(MediaType.APPLICATION_JSON)
@@ -164,7 +173,7 @@ class AccountControllerTest extends BaseControllerTest {
     // given
     User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
     String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
-    Account account = generateAccount(user.getId(), "account1", "DEPOSIT", "우리은행");
+    Account account = generateAccount(user.getId(), user.getName(), "account1", "DEPOSIT", "우리은행");
 
     // when
     ResultActions result = mockMvc.perform(get("/accounts/me/{accountId}", account.getId())
@@ -180,8 +189,8 @@ class AccountControllerTest extends BaseControllerTest {
                 fieldWithPath("accountId").type(JsonFieldType.NUMBER).description("계좌 아이디"),
                 fieldWithPath("accountName").type(JsonFieldType.STRING).description("계좌 이름"),
                 fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호"),
-                fieldWithPath("amounts").type(JsonFieldType.OBJECT).description("잔액 정보"),
-                fieldWithPath("amounts.money").type(JsonFieldType.NUMBER).description("잔액"),
+                fieldWithPath("balance").type(JsonFieldType.OBJECT).description("잔액 정보"),
+                fieldWithPath("balance.money").type(JsonFieldType.NUMBER).description("잔액"),
                 fieldWithPath("accountType").type(JsonFieldType.STRING).description("계좌 타입"),
                 fieldWithPath("bank").type(JsonFieldType.STRING).description("은행"),
                 fieldWithPath("openDate").type(JsonFieldType.VARIES).description("개설 날짜"),
@@ -196,6 +205,52 @@ class AccountControllerTest extends BaseControllerTest {
         ));
 
   }
+
+
+  @Test
+  @DisplayName("이체 테스트")
+  void transfer() throws Exception {
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    User friend = generateUser("friend1", "friendpwd12!", "friend@gmail.com", "010-1110-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+    Account account = generateAccount(user.getId(), user.getName(), "account1", "DEPOSIT", "우리은행");
+    Account friendAccount = generateAccount(friend.getId(), friend.getName(), "account2", "DEPOSIT", "국민은행");
+    TransferRequest transferRequest = new TransferRequest(account.getId(), friendAccount.getId(), new Money(1000L), friendAccount.getAccountNumber(), "이체테스트");
+    // when
+    account.deposit(new Money(10000L));
+    userService.follow(user.getId(), friend.getId());
+    ResultActions result = mockMvc.perform(post("/accounts/transfer")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken)
+        .content(objectMapper.writeValueAsString(transferRequest)));
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 계좌 아이디를 통한 이체 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            requestFields(
+                fieldWithPath("fromAccountId").type(JsonFieldType.NUMBER).description("나의 계좌 아이디"),
+                fieldWithPath("toAccountId").type(JsonFieldType.NUMBER).description("상대 계좌 아이디"),
+                fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호").optional(),
+                fieldWithPath("amount").type(JsonFieldType.OBJECT).description("이체 금액"),
+                fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("이체 금액"),
+                fieldWithPath("content").type(JsonFieldType.STRING).description("이체 내용").optional()
+            ),
+            responseFields(
+                fieldWithPath("from").type(JsonFieldType.STRING).description("송신자 이름"),
+                fieldWithPath("to").type(JsonFieldType.STRING).description("수신자 이름"),
+                fieldWithPath("amount").type(JsonFieldType.OBJECT).description("이체 금액 정보"),
+                fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("이체 금액"),
+                fieldWithPath("balance").type(JsonFieldType.OBJECT).description("잔액 정보"),
+                fieldWithPath("balance.money").type(JsonFieldType.NUMBER).description("잔액"),
+                fieldWithPath("isDeposit").type(JsonFieldType.BOOLEAN).description("입금인지 출금인지 확인"),
+                fieldWithPath("transferTime").type(JsonFieldType.VARIES).description("이체 시간"),
+                fieldWithPath("content").type(JsonFieldType.STRING).description("이체 내용").optional()
+            )
+        ));
+  }
+
 
   private User generateUser(String loginId, String password, String email, String phone) {
 
@@ -213,11 +268,13 @@ class AccountControllerTest extends BaseControllerTest {
     return userRepository.save(user);
   }
 
-  private Account generateAccount(Long userId, String accountName, String type, String bank) {
+  private Account generateAccount(Long userId, String ownerName, String accountName, String type, String bank) {
     Account account = Account.builder()
         .userId(userId)
+        .ownerName(ownerName)
         .accountName(accountName)
         .accountType(AccountType.valueOf(type))
+        .balance(new Money(10000L))
         .bank(Bank.valueOf(bank))
         .build();
 

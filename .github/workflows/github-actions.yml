@@ -31,11 +31,10 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Make application.yml
-
-#        run: |
-#          mkdir ./src/main/resources
-#          touch ./src/main/resources/application.yml
-#          echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application.yml
+        run: | 
+          mkdir ./src/main/resources
+          touch ./src/main/resources/application.yml
+          echo "${{ secrets.APPLICATION }}" >> ./src/main/resources/application.yml
         shell: bash
 #        env:
 #          APPLICATION: ${{ secrets.APPLICATION }}

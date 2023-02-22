@@ -25,10 +25,10 @@ jobs:
           cd ./src/main
           mkdir resources
           touch ./application.yml
-          echo "$APPLICATION" >> ./application.yml
+          echo "${{ secrets.APPLICATION }}" >> ./application.yml
         shell: bash
-        env:
-          APPLICATION: ${{ secrets.APPLICATION }}
+#        env:
+#          APPLICATION: ${{ secrets.APPLICATION }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import numble.banking.core.account.command.application.DepositRequest;
 import numble.banking.core.account.command.application.OpenAccountRequest;
 import numble.banking.core.account.command.application.TransferRequest;
 import numble.banking.core.account.command.domain.Account;
@@ -249,6 +250,43 @@ class AccountControllerTest extends BaseControllerTest {
             )
         ));
   }
+
+  @Test
+  @DisplayName("내 계좌 입금 테스트")
+  void deposit() throws Exception {
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+    Account account = generateAccount(user.getId(), user.getName(), "account1", "DEPOSIT", "우리은행");
+    DepositRequest depositRequest = new DepositRequest(account.getId(), new Money(1000L), account.getAccountNumber());
+
+    // when
+    ResultActions result = mockMvc.perform(post("/accounts/deposit/me")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken)
+        .content(objectMapper.writeValueAsString(depositRequest)));
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 자신 계좌에 입금 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            requestFields(
+                fieldWithPath("accountId").type(JsonFieldType.NUMBER).description("나의 계좌 아이디"),
+                fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호").optional(),
+                fieldWithPath("amount").type(JsonFieldType.OBJECT).description("입금 금액"),
+                fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("입금 금액")
+            ),
+            responseFields(
+                fieldWithPath("amount").type(JsonFieldType.OBJECT).description("입금 금액 정보"),
+                fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("입금 금액"),
+                fieldWithPath("balance").type(JsonFieldType.OBJECT).description("잔액 정보"),
+                fieldWithPath("balance.money").type(JsonFieldType.NUMBER).description("잔액"),
+                fieldWithPath("isDeposit").type(JsonFieldType.BOOLEAN).description("입금인지 출금인지 확인"),
+                fieldWithPath("transferTime").type(JsonFieldType.VARIES).description("이체 시간")
+            )
+        ));
+  }
+
 
   @Test
   @DisplayName("친구 계좌 리스트 조회 테스트")

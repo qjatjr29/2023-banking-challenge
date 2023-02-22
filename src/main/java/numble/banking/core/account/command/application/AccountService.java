@@ -51,4 +51,8 @@ public class AccountService {
   public TransferResponse transfer(Long userId, TransferRequest request) {
     return transferService.transferMoney(userId, request);
   }
+
+  public DepositResponse deposit(Long userId, DepositRequest request) {
+    return transferService.deposit(userId, request);
+  }
 }

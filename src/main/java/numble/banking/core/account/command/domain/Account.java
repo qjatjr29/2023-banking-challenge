@@ -116,6 +116,18 @@ public class Account extends BaseEntity {
     this.transferHistories.add(history);
   }
 
+  public void addDepositHistory(Money amounts) {
+    TransferHistory history = TransferHistory.builder()
+        .transferAmount(amounts)
+        .balance(this.balance)
+        .transferPersonName(this.ownerName)
+        .content("입금")
+        .isDeposit(true)
+        .build();
+
+    this.transferHistories.add(history);
+  }
+
   private void setAccountNumber(String accountNumber) {
     this.accountNumber = accountNumber;
   }

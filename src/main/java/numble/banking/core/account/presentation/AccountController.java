@@ -3,6 +3,8 @@ package numble.banking.core.account.presentation;
 import java.net.URI;
 import numble.banking.core.account.command.application.AccountDetailResponse;
 import numble.banking.core.account.command.application.AccountService;
+import numble.banking.core.account.command.application.DepositRequest;
+import numble.banking.core.account.command.application.DepositResponse;
 import numble.banking.core.account.command.application.TransferRequest;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
@@ -43,6 +45,15 @@ public class AccountController {
     AccountDetailResponse response = accountService.openAccount(userId, request);
 
     return ResponseEntity.created(URI.create("")).body(response);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @PostMapping("/deposit/me")
+  public ResponseEntity<DepositResponse> deposit(@LoginUser Long userId, @RequestBody DepositRequest request) {
+
+    DepositResponse response = accountService.deposit(userId, request);
+
+    return ResponseEntity.ok().body(response);
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})

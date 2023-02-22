@@ -101,6 +101,44 @@ public class TransferService {
 
   }
 
+  public DepositResponse deposit(Long userId, DepositRequest request) {
+
+    String key = ACCOUNT_LOCK_KEY_PREFIX + request.getAccountId();
+    RLock lock = redissonClient.getLock(key);
+
+    try {
+      lock.lock();
+
+      Account account = accountRepository.findById(request.getAccountId())
+          .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+      if(!account.getUserId().equals(userId)) throw new BadRequestException(ErrorCode.INVALID_ACCOUNT_OWNER);
+
+      transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+        @Override
+        protected void doInTransactionWithoutResult(TransactionStatus status) {
+          account.deposit(request.getAmount());
+          account.addDepositHistory(request.getAmount());
+          accountRepository.save(account);
+        }
+      });
+
+      TransferCompletedEvent event = new TransferCompletedEvent(account.getOwnerName(),
+          account.getAccountNumber(),
+          request.getAmount(),
+          account.getBalance(),
+          true,
+          account.getTransferHistories().get(account.getTransferHistories().size() - 1).getTransferTime());
+
+      Events.raise(event);
+
+      return DepositResponse.of(account.getTransferHistories().get(account.getTransferHistories().size() - 1));
+
+    } finally {
+      lock.unlock();
+    }
+  }
+
   private void areFriends(User user, Long otherUserId) {
     if(!user.areTheyFriend(otherUserId)) throw new BadRequestException(ErrorCode.INSUFFICIENT_QUALIFICATIONS_FRIEND);
   }

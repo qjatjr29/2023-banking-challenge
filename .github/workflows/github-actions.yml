@@ -20,6 +20,16 @@ jobs:
           java-version: ${{ secrets.JAVA_VERSION }}
           distribution: 'temurin'
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Make application.yml
         run: |
           cd ./src/main
@@ -29,6 +39,10 @@ jobs:
         shell: bash
 #        env:
 #          APPLICATION: ${{ secrets.APPLICATION }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: application.yml
+          path: ./src/main/resources/application.yml
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

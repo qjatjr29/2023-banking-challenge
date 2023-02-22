@@ -28,7 +28,8 @@ public enum ErrorCode {
   WRONG_AMOUNT_INPUT_VALUE(400, "ACCOUNT-002", "잘못된 돈이 들어온 경우"),
   OVER_AMOUNT_CURRENT_VALUE(400, "ACCOUNT-003", "현재 계좌에 있는 잔액보다 더 많은 돈을 출금하는 경우"),
   INSUFFICIENT_QUALIFICATIONS_FRIEND(400, "ACCOUNT-004", "친구 사이가 아닌 경우"),
-  FAILURE_GET_LOCK(500, "ACCOUNT-005", "락 획득 실패");
+  FAILURE_GET_LOCK(500, "ACCOUNT-005", "락 획득 실패"),
+  INVALID_ACCOUNT_OWNER(400, "ACCOUNT-006", "계좌 주인이 잘못된 경우");
 
 
   int statusCode;

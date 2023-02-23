@@ -464,11 +464,13 @@ class UserControllerTest extends BaseControllerTest {
     // given
     User user = generateUser(loginId, password, email, phone);
     User friend = generateUser("friend", "friend12!", "friend@gmail.com", "010-1111-1111");
+    User friend2 = generateUser("friend2", "friend123!", "friend2@gmail.com", "010-1221-1111");
     TokenData tokenData = TokenData.of(user);
     String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
 
     // when
     userService.follow(user.getId(), friend.getId());
+    userService.follow(user.getId(), friend2.getId());
     ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/users/friends/count")
         .contentType(MediaType.APPLICATION_JSON)
         .header(AUTHORIZATION_HEADER, accessToken));
@@ -484,7 +486,7 @@ class UserControllerTest extends BaseControllerTest {
         ));
 
     Assertions.assertThat(user.areTheyFriend(friend.getId())).isTrue();
-    Assertions.assertThat(user.getFriendSet().size()).isEqualTo(1);
+    Assertions.assertThat(user.getFriendSet().size()).isEqualTo(2);
   }
 
 

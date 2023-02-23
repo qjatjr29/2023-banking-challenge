@@ -458,6 +458,35 @@ class UserControllerTest extends BaseControllerTest {
     Assertions.assertThat(user.getFriendSet().size()).isEqualTo(0);
   }
 
+  @Test
+  @DisplayName("친구 수 조회 테스트")
+  void getFriendCount() throws Exception {
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    User friend = generateUser("friend", "friend12!", "friend@gmail.com", "010-1111-1111");
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    userService.follow(user.getId(), friend.getId());
+    ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get("/users/friends/count")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("유저 - 친구 수 조회 성공",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("count").type(JsonFieldType.NUMBER).description("친구 수 ")
+            )
+        ));
+
+    Assertions.assertThat(user.areTheyFriend(friend.getId())).isTrue();
+    Assertions.assertThat(user.getFriendSet().size()).isEqualTo(1);
+  }
+
 
   static Stream<Arguments> signupFailRequests() {
     return Stream.of(

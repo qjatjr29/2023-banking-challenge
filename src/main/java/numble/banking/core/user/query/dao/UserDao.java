@@ -24,4 +24,6 @@ public interface UserDao extends JpaRepository<UserData, Long> {
   @Query("SELECT u FROM User u WHERE u.id = :id")
   Optional<User> findUserById(@Param("id") Long id);
 
+  @Query("SELECT count(u) FROM User u WHERE u.id = :id")
+  Long countByUserId(@Param("id") Long userId);
 }

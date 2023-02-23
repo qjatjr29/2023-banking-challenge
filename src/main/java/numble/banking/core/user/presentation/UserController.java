@@ -4,6 +4,7 @@ import java.net.URI;
 import javax.validation.Valid;
 import numble.banking.core.common.presentation.Auth;
 import numble.banking.core.common.presentation.LoginUser;
+import numble.banking.core.user.command.application.FriendCountResponse;
 import numble.banking.core.user.command.application.FriendResponse;
 import numble.banking.core.user.command.application.SignupRequest;
 import numble.banking.core.user.command.application.UserDetailResponse;
@@ -86,6 +87,13 @@ public class UserController {
       @PageableDefault(page = 0, size = 10) Pageable pageable) {
     Page<FriendDetailResponse> friendList = userQueryService.getFriendList(userId, pageable);
     return ResponseEntity.ok(friendList);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/friends/count")
+  public ResponseEntity<FriendCountResponse> getFriendCount(@LoginUser Long userId) {
+    FriendCountResponse count = userQueryService.getFriendCount(userId);
+    return ResponseEntity.ok(count);
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.NotFoundException;
+import numble.banking.core.user.command.application.FriendCountResponse;
 import numble.banking.core.user.command.domain.Friend;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.query.dao.UserDao;
@@ -73,5 +74,11 @@ public class UserQueryService {
         .collect(Collectors.toList());
 
     return new PageImpl<>(friendList, pageable, friendList.size());
+  }
+
+  public FriendCountResponse getFriendCount(Long userId) {
+    userDao.findUserById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+    return new FriendCountResponse(userDao.countByUserId(userId));
   }
 }

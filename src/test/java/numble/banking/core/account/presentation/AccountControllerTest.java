@@ -378,6 +378,42 @@ class AccountControllerTest extends BaseControllerTest {
 
   }
 
+  @Test
+  @DisplayName("전체 이체 내역 개수 조회 테스트")
+  void getHistoriesCount() throws Exception {
+
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+
+    // when
+    Account account = generateAccount(user.getId(), user.getName(), "testAccount1", "DEPOSIT",
+        "우리은행");
+    Account account1 = generateAccount(user.getId(), user.getName(), "testAccount2", "SAVINGS",
+        "국민은행");
+    Account account2 = generateAccount(user.getId(), user.getName(), "testAccount3", "STOCK",
+        "신한은행");
+
+    account.addDepositHistory(new Money(100L));
+    account1.addDepositHistory(new Money(100L));
+    account2.addDepositHistory(new Money(100L));
+    account2.addDepositHistory(new Money(1000L));
+
+    ResultActions result = mockMvc.perform(get("/accounts/me/history/count")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 내 이체 내역 수 조회 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("count").type(JsonFieldType.NUMBER).description("이체 내역 총 개수")
+            )
+        ));
+
+  }
 
   private User generateUser(String loginId, String password, String email, String phone) {
 

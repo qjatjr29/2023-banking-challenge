@@ -22,4 +22,7 @@ public interface AccountDao extends JpaRepository<AccountData, Long> {
 
   @Query("SELECT count(ac) FROM Account ac WHERE ac.userId = :userId")
   Long countByUserId(@Param("userId") Long userId);
+
+  @Query("SELECT sum(ac.transferHistories.size) FROM Account ac WHERE ac.userId = :userId")
+  Long countHistoriesByUserId(@Param("userId") Long userId);
 }

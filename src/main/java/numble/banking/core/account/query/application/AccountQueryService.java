@@ -1,6 +1,6 @@
 package numble.banking.core.account.query.application;
 
-import numble.banking.core.account.command.application.AccountCountResponse;
+import numble.banking.core.account.command.application.CountResponse;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.domain.Account;
@@ -59,10 +59,16 @@ public class AccountQueryService {
   }
 
 
-  public AccountCountResponse getAccountCount(Long userId) {
+  public CountResponse getAccountCount(Long userId) {
 
     if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
-    return new AccountCountResponse(accountDao.countByUserId(userId));
+    return new CountResponse(accountDao.countByUserId(userId));
+  }
+
+  public CountResponse getAllAccountHistoryCount(Long userId) {
+    if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+
+    return new CountResponse(accountDao.countHistoriesByUserId(userId));
   }
 }

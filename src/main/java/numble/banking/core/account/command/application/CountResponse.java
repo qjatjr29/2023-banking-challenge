@@ -6,11 +6,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AccountCountResponse {
+public class CountResponse {
 
   private Long count;
 
-  public AccountCountResponse(Long count) {
+  public CountResponse(Long count) {
     this.count = count;
   }
 }

@@ -19,4 +19,7 @@ public interface AccountDao extends JpaRepository<AccountData, Long> {
 
   @Query("SELECT ac FROM Account ac WHERE ac.userId = :friendId")
   Page<Account> findFriendAccounts(@Param("friendId") Long friendId, Pageable pageable);
+
+  @Query("SELECT count(ac) FROM Account ac WHERE ac.userId = :userId")
+  Long countByUserId(@Param("userId") Long userId);
 }

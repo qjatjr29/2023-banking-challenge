@@ -1,6 +1,7 @@
 package numble.banking.core.account.presentation;
 
 import java.net.URI;
+import numble.banking.core.account.command.application.AccountCountResponse;
 import numble.banking.core.account.command.application.AccountDetailResponse;
 import numble.banking.core.account.command.application.AccountService;
 import numble.banking.core.account.command.application.DepositRequest;
@@ -91,6 +92,15 @@ public class AccountController {
     Page<AccountSummaryResponse> response = accountQueryService.getFriendAccountList(userId, friendId, pageable);
 
     return ResponseEntity.ok().body(response);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/me/count")
+  public ResponseEntity<AccountCountResponse> getAccountCount(@LoginUser Long userId) {
+
+    AccountCountResponse count = accountQueryService.getAccountCount(userId);
+
+    return ResponseEntity.ok().body(count);
   }
 
 }

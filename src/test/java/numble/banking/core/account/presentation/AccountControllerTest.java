@@ -349,6 +349,35 @@ class AccountControllerTest extends BaseControllerTest {
 
   }
 
+  @Test
+  @DisplayName("내 계좌 개수 조회 테스트")
+  void getAccountCount() throws Exception {
+
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+
+    // when
+    generateAccount(user.getId(), user.getName(), "testAccount1", "DEPOSIT", "우리은행");
+    generateAccount(user.getId(), user.getName(), "testAccount2", "SAVINGS", "국민은행");
+    generateAccount(user.getId(), user.getName(), "testAccount3", "STOCK", "신한은행");
+
+    ResultActions result = mockMvc.perform(get("/accounts/me/count")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 내 계좌 개수 조회 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("count").type(JsonFieldType.NUMBER).description("계좌 총 개수")
+            )
+        ));
+
+  }
+
 
   private User generateUser(String loginId, String password, String email, String phone) {
 

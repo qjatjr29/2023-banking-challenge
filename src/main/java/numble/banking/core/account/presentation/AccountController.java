@@ -7,6 +7,7 @@ import numble.banking.core.account.command.application.AccountService;
 import numble.banking.core.account.command.application.DepositRequest;
 import numble.banking.core.account.command.application.DepositResponse;
 import numble.banking.core.account.command.application.TransferRequest;
+import numble.banking.core.account.command.application.TransferUsingAccountNumberRequest;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.application.OpenAccountRequest;
@@ -62,6 +63,15 @@ public class AccountController {
   public ResponseEntity<TransferResponse> transferUsingAccountId(@LoginUser Long userId, @RequestBody TransferRequest request) {
 
     TransferResponse response = accountService.transfer(userId, request);
+
+    return ResponseEntity.ok().body(response);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @PostMapping("/transfer/accountNumber")
+  public ResponseEntity<TransferResponse> transferUsingAccountNumber(@LoginUser Long userId, @RequestBody TransferUsingAccountNumberRequest request) {
+
+    TransferResponse response = accountService.transferUsingAccountNumber(userId, request);
 
     return ResponseEntity.ok().body(response);
   }

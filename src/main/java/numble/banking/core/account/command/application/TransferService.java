@@ -66,8 +66,8 @@ public class TransferService {
           fromAccount.withdrawal(request.getAmount());
           toAccount.deposit(request.getAmount());
 
-          fromAccount.addTransferHistory(request.getAmount(), toAccount.getOwnerName(), request.getContent(), true);
-          toAccount.addTransferHistory(request.getAmount(), fromAccount.getOwnerName(), request.getContent(), false);
+          fromAccount.addTransferHistory(request.getAmount(), toAccount.getOwnerName(), request.getContent(), false);
+          toAccount.addTransferHistory(request.getAmount(), fromAccount.getOwnerName(), request.getContent(), true);
 
           accountRepository.save(fromAccount);
           accountRepository.save(toAccount);
@@ -99,6 +99,65 @@ public class TransferService {
       lock.unlock();
     }
 
+  }
+
+  public TransferResponse transferMoneyUsingAccountNumber(Long userId,
+      TransferUsingAccountNumberRequest request) {
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+    Account fromAccount = accountRepository.findByAccountNumber(request.getFromAccountNumber())
+        .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+    Account toAccount = accountRepository.findByAccountNumber(request.getToAccountNumber())
+        .orElseThrow(() -> new NotFoundException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+    areFriends(user, toAccount.getUserId());
+
+    String key = ACCOUNT_LOCK_KEY_PREFIX + fromAccount.getId() + "-" + toAccount.getId();
+    RLock lock = redissonClient.getLock(key);
+
+    try {
+      lock.lock();
+      transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+        @Override
+        protected void doInTransactionWithoutResult(TransactionStatus status) {
+          fromAccount.withdrawal(request.getAmount());
+          toAccount.deposit(request.getAmount());
+
+          fromAccount.addTransferHistory(request.getAmount(), toAccount.getOwnerName(), request.getContent(), false);
+          toAccount.addTransferHistory(request.getAmount(), fromAccount.getOwnerName(), request.getContent(), true);
+
+          accountRepository.save(fromAccount);
+          accountRepository.save(toAccount);
+        }
+      });
+
+      TransferCompletedEvent event = new TransferCompletedEvent(toAccount.getOwnerName(),
+          fromAccount.getAccountNumber(),
+          request.getAmount(),
+          fromAccount.getBalance(),
+          true,
+          fromAccount.getTransferHistories().get(fromAccount.getTransferHistories().size() - 1).getTransferTime());
+
+      Events.raise(event);
+
+      event = new TransferCompletedEvent(fromAccount.getOwnerName(),
+          toAccount.getAccountNumber(),
+          request.getAmount(),
+          toAccount.getBalance(),
+          false,
+          toAccount.getTransferHistories().get(toAccount.getTransferHistories().size() - 1).getTransferTime());
+      Events.raise(event);
+
+      return TransferResponse.from(fromAccount.getOwnerName(),
+          toAccount.getOwnerName(),
+          fromAccount.getTransferHistories()
+              .get(fromAccount.getTransferHistories().size() - 1));
+    } finally {
+      lock.unlock();
+    }
   }
 
   public DepositResponse deposit(Long userId, DepositRequest request) {

@@ -1,5 +1,7 @@
 package numble.banking.core.account.query.dto;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +13,8 @@ import numble.banking.core.account.command.domain.Bank;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AccountSummaryResponse {
 
+  private Long id;
+
   private String accountNumber;
 
   private String accountName;
@@ -19,15 +23,19 @@ public class AccountSummaryResponse {
 
   private Bank bank;
 
-  protected AccountSummaryResponse(final String accountNumber, final String accountName, final AccountType type, final Bank bank) {
-    this.accountNumber = accountNumber;
-    this.accountName = accountName;
-    this.type = type;
-    this.bank = bank;
+  private LocalDate createdAt;
+
+  protected AccountSummaryResponse(final Account account) {
+    this.id = account.getId();
+    this.accountNumber = account.getAccountNumber();
+    this.accountName = account.getAccountName();
+    this.type = account.getAccountType();
+    this.bank = account.getBank();
+    this.createdAt = LocalDate.from(account.getCreatedAt());
   }
 
   public static AccountSummaryResponse of(final Account account) {
 
-    return new AccountSummaryResponse(account.getAccountNumber(), account.getAccountName(), account.getAccountType(), account.getBank());
+    return new AccountSummaryResponse(account);
   }
 }

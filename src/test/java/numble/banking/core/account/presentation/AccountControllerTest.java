@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import numble.banking.core.account.command.application.DepositRequest;
 import numble.banking.core.account.command.application.OpenAccountRequest;
 import numble.banking.core.account.command.application.TransferRequest;
+import numble.banking.core.account.command.application.TransferUsingAccountNumberRequest;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.command.domain.AccountRepository;
 import numble.banking.core.account.command.domain.AccountType;
@@ -233,6 +234,49 @@ class AccountControllerTest extends BaseControllerTest {
                 fieldWithPath("fromAccountId").type(JsonFieldType.NUMBER).description("나의 계좌 아이디"),
                 fieldWithPath("toAccountId").type(JsonFieldType.NUMBER).description("상대 계좌 아이디"),
                 fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호").optional(),
+                fieldWithPath("amount").type(JsonFieldType.OBJECT).description("이체 금액"),
+                fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("이체 금액"),
+                fieldWithPath("content").type(JsonFieldType.STRING).description("이체 내용").optional()
+            ),
+            responseFields(
+                fieldWithPath("from").type(JsonFieldType.STRING).description("송신자 이름"),
+                fieldWithPath("to").type(JsonFieldType.STRING).description("수신자 이름"),
+                fieldWithPath("amount").type(JsonFieldType.OBJECT).description("이체 금액 정보"),
+                fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("이체 금액"),
+                fieldWithPath("balance").type(JsonFieldType.OBJECT).description("잔액 정보"),
+                fieldWithPath("balance.money").type(JsonFieldType.NUMBER).description("잔액"),
+                fieldWithPath("isDeposit").type(JsonFieldType.BOOLEAN).description("입금인지 출금인지 확인"),
+                fieldWithPath("transferTime").type(JsonFieldType.VARIES).description("이체 시간"),
+                fieldWithPath("content").type(JsonFieldType.STRING).description("이체 내용").optional()
+            )
+        ));
+  }
+
+  @Test
+  @DisplayName("계좌번호를 통한이체 테스트")
+  void transferUsingAccountNumber() throws Exception {
+    // given
+    User user = generateUser("beomsic", "password12!", "beomsic@gmail.com", "010-0000-0000");
+    User friend = generateUser("friend1", "friendpwd12!", "friend@gmail.com", "010-1110-0000");
+    String accessToken = jwtTokenProvider.generateAccessToken(TokenData.of(user));
+    Account account = generateAccount(user.getId(), user.getName(), "account1", "DEPOSIT", "우리은행");
+    Account friendAccount = generateAccount(friend.getId(), friend.getName(), "account2", "DEPOSIT", "국민은행");
+    TransferUsingAccountNumberRequest transferRequest = new TransferUsingAccountNumberRequest(account.getAccountNumber(), friendAccount.getAccountNumber(), "이체테스트", new Money(1000L));
+    // when
+    account.deposit(new Money(10000L));
+    userService.follow(user.getId(), friend.getId());
+    ResultActions result = mockMvc.perform(post("/accounts/transfer/accountNumber")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization", accessToken)
+        .content(objectMapper.writeValueAsString(transferRequest)));
+    // then
+    result.andExpect(status().isOk())
+        .andDo(document("계좌 - 계좌번호를 통한 이체 API",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            requestFields(
+                fieldWithPath("fromAccountNumber").type(JsonFieldType.STRING).description("나의 계좌번호"),
+                fieldWithPath("toAccountNumber").type(JsonFieldType.STRING).description("상대 계좌번호"),
                 fieldWithPath("amount").type(JsonFieldType.OBJECT).description("이체 금액"),
                 fieldWithPath("amount.money").type(JsonFieldType.NUMBER).description("이체 금액"),
                 fieldWithPath("content").type(JsonFieldType.STRING).description("이체 내용").optional()

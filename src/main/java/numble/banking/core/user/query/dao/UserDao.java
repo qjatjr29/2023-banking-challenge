@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserDao extends JpaRepository<UserData, Long> {
 
-  @Query("SELECT new numble.banking.core.user.query.dto.UserQueryDetailResponse(u.loginId, u.name, u.email, u.phone, u.address) FROM User u WHERE u.id = :id")
+  @Query("SELECT new numble.banking.core.user.query.dto.UserQueryDetailResponse(u.id, u.loginId, u.name, u.email, u.phone, u.address, u.createdAt) FROM User u WHERE u.id = :id")
   Optional<UserQueryDetailResponse> findDetailById(@Param("id") Long id);
 
   @Query("SELECT u FROM User u WHERE u.id <> :id")

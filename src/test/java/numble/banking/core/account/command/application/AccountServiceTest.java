@@ -7,10 +7,14 @@ import numble.banking.core.account.command.domain.AccountRepository;
 import numble.banking.core.account.command.domain.AccountType;
 import numble.banking.core.account.command.domain.Bank;
 import numble.banking.core.account.command.domain.Money;
+import numble.banking.core.common.error.exception.BadRequestException;
+import numble.banking.core.common.error.exception.ConflictException;
+import numble.banking.core.user.command.application.NotFriendException;
 import numble.banking.core.user.command.application.UserService;
 import numble.banking.core.user.command.domain.Address;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -114,5 +118,31 @@ class AccountServiceTest {
     assertEquals(9000L, userAccount.getBalance().getMoney());
     assertEquals(11000L, friendAccount.getBalance().getMoney());
     assertEquals(1, userAccount.getTransferHistories().size());
+  }
+
+  @Test
+  @DisplayName("이체시 돈이 부족한 경우")
+  public void transferMoneyThrowInsufficientBalanceExceptionWhenNotEnoughBalance() {
+    // given
+    TransferRequest transferRequest = new TransferRequest(userAccount.getId(), friendAccount.getId(), new Money(11000L), friendAccount.getAccountNumber(), "test");
+
+    // when
+    userService.follow(user.getId(), friend.getId());
+
+    // then
+    Assertions.assertThatThrownBy(() ->accountService.transfer(user.getId(), transferRequest))
+        .isInstanceOf(InsufficientBalanceException.class);
+  }
+
+  @Test
+  @DisplayName("친구가 아닌 사람에게 이체하려는 경우")
+  public void transferMoney_shouldThrowNotFriendException_whenNotFriends() {
+
+    // given
+    TransferRequest transferRequest = new TransferRequest(userAccount.getId(), friendAccount.getId(), new Money(1000L), friendAccount.getAccountName(), "test");
+
+    // when & then
+    Assertions.assertThatThrownBy(() ->accountService.transfer(1L, transferRequest))
+        .isInstanceOf(NotFriendException.class);
   }
 }

@@ -81,4 +81,9 @@ public class UserQueryService {
         .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
     return new FriendCountResponse(userDao.countByUserId(userId));
   }
+
+  public UserQueryDetailResponse getUserById(Long id) {
+    return userDao.findDetailById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+  }
 }

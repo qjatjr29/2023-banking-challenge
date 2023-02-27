@@ -72,6 +72,13 @@ public class UserController {
   }
 
   @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/{id}")
+  public ResponseEntity<UserQueryDetailResponse> getUserDetail(@PathVariable Long id) {
+    UserQueryDetailResponse user = userQueryService.getUserById(id);
+    return ResponseEntity.ok(user);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
   @GetMapping("/name")
   public ResponseEntity<Page<UserSummaryResponse>> getUsersByName(@RequestParam("name") String name,
       @LoginUser Long userId,

@@ -151,7 +151,7 @@ class UserControllerTest extends BaseControllerTest {
 
   @Test
   @DisplayName("내정보 조회 테스트")
-  void getUserInfo() throws Exception {
+  void getMyInfo() throws Exception {
 
     // given
     User user = generateUser(loginId, password, email, phone);
@@ -171,6 +171,7 @@ class UserControllerTest extends BaseControllerTest {
             getDocumentRequest(),
             getDocumentResponse(),
             responseFields(
+                fieldWithPath("id").type(JsonFieldType.NUMBER).description("유저 아이디"),
                 fieldWithPath("loginId").type(JsonFieldType.STRING).description("유저 로그인 아이디"),
                 fieldWithPath("name").type(JsonFieldType.STRING).description("이름"),
                 fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
@@ -178,11 +179,50 @@ class UserControllerTest extends BaseControllerTest {
                 fieldWithPath("address").type(JsonFieldType.OBJECT).description("주소 정보"),
                 fieldWithPath("address.zipCode").type(JsonFieldType.STRING).description("우편번호").optional(),
                 fieldWithPath("address.address").type(JsonFieldType.STRING).description("주소").optional(),
-                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소").optional()
+                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소").optional(),
+                fieldWithPath("createdAt").type(JsonFieldType.VARIES).description("가입 시간")
             )
         ));
 
   }
+
+  @Test
+  @DisplayName("유저 정보 조회 테스트")
+  void getUserInfo() throws Exception {
+
+    // given
+    User user = generateUser(loginId, password, email, phone);
+    TokenData tokenData = TokenData.of(user);
+    String accessToken = jwtTokenProvider.generateAccessToken(tokenData);
+
+    // when
+    ResultActions result = mockMvc.perform(get("/users/{userId}", user.getId())
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(AUTHORIZATION_HEADER, accessToken));
+
+    // then
+    result.andExpect(status().isOk())
+        .andExpect(jsonPath("email").value(email))
+        .andExpect(jsonPath("phone").value(phone))
+        .andDo(document("유저 - 유저 상세 정보 조회 성공",
+            getDocumentRequest(),
+            getDocumentResponse(),
+            responseFields(
+                fieldWithPath("id").type(JsonFieldType.NUMBER).description("유저 아이디"),
+                fieldWithPath("loginId").type(JsonFieldType.STRING).description("유저 로그인 아이디"),
+                fieldWithPath("name").type(JsonFieldType.STRING).description("이름"),
+                fieldWithPath("email").type(JsonFieldType.STRING).description("이메일"),
+                fieldWithPath("phone").type(JsonFieldType.STRING).description("휴대폰 번호"),
+                fieldWithPath("address").type(JsonFieldType.OBJECT).description("주소 정보"),
+                fieldWithPath("address.zipCode").type(JsonFieldType.STRING).description("우편번호").optional(),
+                fieldWithPath("address.address").type(JsonFieldType.STRING).description("주소").optional(),
+                fieldWithPath("address.roadAddress").type(JsonFieldType.STRING).description("도로명주소").optional(),
+                fieldWithPath("createdAt").type(JsonFieldType.VARIES).description("가입 시간")
+            )
+        ));
+
+  }
+
 
   @Test
   @DisplayName("유저 전체 조회 테스트")

@@ -133,10 +133,12 @@ class AccountControllerTest extends BaseControllerTest {
             responseFields(
 
                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("계좌 아이디"),
                 fieldWithPath("content.[].accountNumber").type(JsonFieldType.STRING).description("계좌 번호").optional(),
                 fieldWithPath("content.[].accountName").type(JsonFieldType.STRING).description("계좌 이름").optional(),
                 fieldWithPath("content.[].type").type(JsonFieldType.STRING).description("계좌 타입").optional(),
                 fieldWithPath("content.[].bank").type(JsonFieldType.STRING).description("은행").optional(),
+                fieldWithPath("content.[].createdAt").type(JsonFieldType.VARIES).description("개설 날짜").optional(),
 
                 fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
                 fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),
@@ -190,8 +192,7 @@ class AccountControllerTest extends BaseControllerTest {
                 fieldWithPath("accountId").type(JsonFieldType.NUMBER).description("계좌 아이디"),
                 fieldWithPath("accountName").type(JsonFieldType.STRING).description("계좌 이름"),
                 fieldWithPath("accountNumber").type(JsonFieldType.STRING).description("계좌번호"),
-                fieldWithPath("balance").type(JsonFieldType.OBJECT).description("잔액 정보"),
-                fieldWithPath("balance.money").type(JsonFieldType.NUMBER).description("잔액"),
+                fieldWithPath("balance").type(JsonFieldType.NUMBER).description("잔액"),
                 fieldWithPath("accountType").type(JsonFieldType.STRING).description("계좌 타입"),
                 fieldWithPath("bank").type(JsonFieldType.STRING).description("은행"),
                 fieldWithPath("openDate").type(JsonFieldType.VARIES).description("개설 날짜"),
@@ -360,10 +361,12 @@ class AccountControllerTest extends BaseControllerTest {
             responseFields(
 
                 fieldWithPath("content").type(JsonFieldType.ARRAY).description("검색 결과 리스트"),
+                fieldWithPath("content.[].id").type(JsonFieldType.NUMBER).description("계좌 아이디"),
                 fieldWithPath("content.[].accountNumber").type(JsonFieldType.STRING).description("계좌 번호").optional(),
                 fieldWithPath("content.[].accountName").type(JsonFieldType.STRING).description("계좌 이름").optional(),
                 fieldWithPath("content.[].type").type(JsonFieldType.STRING).description("계좌 타입").optional(),
                 fieldWithPath("content.[].bank").type(JsonFieldType.STRING).description("은행").optional(),
+                fieldWithPath("content.[].createdAt").type(JsonFieldType.VARIES).description("개설 날짜").optional(),
 
                 fieldWithPath("pageable").type(JsonFieldType.OBJECT).description("페이징 정보"),
                 fieldWithPath("pageable.sort").type(JsonFieldType.OBJECT).description("페이지 정렬 정보"),

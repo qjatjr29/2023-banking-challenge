@@ -8,6 +8,7 @@ import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.BadRequestException;
 import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.common.event.Events;
+import numble.banking.core.user.command.application.NotFriendException;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import org.redisson.api.RLock;
@@ -199,7 +200,7 @@ public class TransferService {
   }
 
   private void areFriends(User user, Long otherUserId) {
-    if(!user.areTheyFriend(otherUserId)) throw new BadRequestException(ErrorCode.INSUFFICIENT_QUALIFICATIONS_FRIEND);
+    if(!user.areTheyFriend(otherUserId)) throw new NotFriendException(ErrorCode.INSUFFICIENT_QUALIFICATIONS_FRIEND);
   }
 
 }

@@ -25,6 +25,7 @@ import numble.banking.core.account.command.application.MoneyConverter;
 import numble.banking.core.common.domain.BaseEntity;
 import numble.banking.core.common.error.ErrorCode;
 import numble.banking.core.common.error.exception.BadRequestException;
+import numble.banking.core.account.command.application.InsufficientBalanceException;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -98,7 +99,7 @@ public class Account extends BaseEntity {
 
   public void withdrawal(Money amounts) {
     if(amounts.getMoney() < 0) throw new BadRequestException(ErrorCode.WRONG_AMOUNT_INPUT_VALUE);
-    if(!canSendMoney(amounts.getMoney())) throw new BadRequestException(ErrorCode.OVER_AMOUNT_CURRENT_VALUE);
+    if(!canSendMoney(amounts.getMoney())) throw new InsufficientBalanceException(ErrorCode.OVER_AMOUNT_CURRENT_VALUE);
 
     setMoney(-amounts.getMoney());
   }

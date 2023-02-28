@@ -27,4 +27,17 @@ public class TransferCompletedEvent extends Event {
     this.isDeposit = isDeposit;
     this.transferTime = transferTime;
   }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("TransferCompletedEvent{");
+    sb.append("toUserName='").append(toUserName).append('\'');
+    sb.append(", accountNumber='").append(accountNumber).append('\'');
+    sb.append(", amount=").append(amount);
+    sb.append(", balance=").append(balance);
+    sb.append(", isDeposit=").append(isDeposit);
+    sb.append(", transferTime=").append(transferTime);
+    sb.append('}');
+    return sb.toString();
+  }
 }

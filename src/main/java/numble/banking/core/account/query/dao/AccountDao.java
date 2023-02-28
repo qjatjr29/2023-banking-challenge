@@ -1,5 +1,6 @@
 package numble.banking.core.account.query.dao;
 
+import java.util.List;
 import numble.banking.core.account.command.domain.Account;
 import numble.banking.core.account.query.dto.AccountData;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
@@ -25,4 +26,7 @@ public interface AccountDao extends JpaRepository<AccountData, Long> {
 
   @Query("SELECT sum(ac.transferHistories.size) FROM Account ac WHERE ac.userId = :userId")
   Long countHistoriesByUserId(@Param("userId") Long userId);
+
+  @Query("SELECT ac FROM Account ac WHERE ac.userId = :userId")
+  List<Account> findAllByUserId(@Param("userId") Long userId);
 }

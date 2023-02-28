@@ -1,6 +1,10 @@
 package numble.banking.core.account.query.application;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import numble.banking.core.account.command.application.CountResponse;
+import numble.banking.core.account.command.domain.TransferHistory;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.domain.Account;
@@ -11,6 +15,7 @@ import numble.banking.core.common.error.exception.NotFoundException;
 import numble.banking.core.user.command.domain.User;
 import numble.banking.core.user.command.domain.UserRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,5 +75,16 @@ public class AccountQueryService {
     if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
     return new CountResponse(accountDao.countHistoriesByUserId(userId));
+  }
+
+  public List<TransferHistory> getAllAccountHistory(Long userId, Pageable pageable) {
+    if(!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+
+    List<Account> accountList = accountDao.findAllByUserId(userId);
+
+    return accountList.stream()
+        .flatMap(account -> account.getTransferHistories().stream())
+        .collect(Collectors.toList());
+
   }
 }

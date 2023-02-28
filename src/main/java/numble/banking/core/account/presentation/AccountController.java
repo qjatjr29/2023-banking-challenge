@@ -1,6 +1,7 @@
 package numble.banking.core.account.presentation;
 
 import java.net.URI;
+import java.util.List;
 import numble.banking.core.account.command.application.CountResponse;
 import numble.banking.core.account.command.application.AccountDetailResponse;
 import numble.banking.core.account.command.application.AccountService;
@@ -8,6 +9,7 @@ import numble.banking.core.account.command.application.DepositRequest;
 import numble.banking.core.account.command.application.DepositResponse;
 import numble.banking.core.account.command.application.TransferRequest;
 import numble.banking.core.account.command.application.TransferUsingAccountNumberRequest;
+import numble.banking.core.account.command.domain.TransferHistory;
 import numble.banking.core.account.query.dto.AccountQueryDetailResponse;
 import numble.banking.core.account.query.dto.AccountSummaryResponse;
 import numble.banking.core.account.command.application.OpenAccountRequest;
@@ -115,11 +117,19 @@ public class AccountController {
 
   @Auth(role = {Role.USER, Role.MANAGER})
   @GetMapping("/me/history/count")
-  public ResponseEntity<CountResponse> getALlAccountHistoryCount(@LoginUser Long userId) {
+  public ResponseEntity<CountResponse> getAllAccountHistoryCount(@LoginUser Long userId) {
 
     CountResponse count = accountQueryService.getAllAccountHistoryCount(userId);
 
     return ResponseEntity.ok().body(count);
+  }
+
+  @Auth(role = {Role.USER, Role.MANAGER})
+  @GetMapping("/me/history")
+  public ResponseEntity<List<TransferHistory>> getAllAccountHistory(@LoginUser Long userId, @PageableDefault(page = 0, size = 5) Pageable pageable) {
+
+    List<TransferHistory> historyList = accountQueryService.getAllAccountHistory(userId, pageable);
+    return ResponseEntity.ok().body(historyList);
   }
 
 }

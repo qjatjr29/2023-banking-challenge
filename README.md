@@ -1,6 +1,24 @@
 
 ## NUMBLE 챌린지 - Spring으로 뱅킹 서버 구축하기 
 
+### 짧은 시연 영상
+> 로그인, 조회
+
+![1](https://user-images.githubusercontent.com/74031333/222330888-a20ad0d0-a897-40f9-be05-0633394316a7.gif)
+
+<br/>
+
+> 친구 추가
+
+![2](https://user-images.githubusercontent.com/74031333/222330893-112e2442-95c7-4a44-a923-1ffa3abe49ac.gif)
+
+<br/>
+
+> 이체
+![Screen Recording 2023-03-02 at 1 26 36 PM](https://user-images.githubusercontent.com/74031333/222331330-de22bc07-338b-4fc1-8db9-9c6ecd94c3c8.gif)
+
+<br/>
+
 ## ✔️ 프로젝트 개요
 
 ### ⌛️ 프로젝트 기간
@@ -17,6 +35,8 @@
 <img width="1063" alt="image" src="https://user-images.githubusercontent.com/74031333/222036195-bfcbade2-a07d-4ecd-840d-93cd59f9708d.png">
 
 ### 🔧 사용 기술
+
+<img width="656" alt="image" src="https://user-images.githubusercontent.com/74031333/222342958-da137bc5-849d-4f12-92da-e0fde3f34e20.png">
 
 ![Java](https://img.shields.io/badge/-Java%2011-007396?style=plastic&logo=Java&logoColor=white)
 ![SpringBoot](https://img.shields.io/badge/-Spring%20Boot%202.7.8-6DB33F?style=plastic&logo=Spring%20Boot&logoColor=white)
@@ -115,7 +135,8 @@ AccessToken이 만료되었다면, RefreshToken을 통해 AccessToken을 재발�
 
 > 분산락
 
-
+공유 자원을 레디스에 올려 분산락을 이용해 데이터 동시성 문제를 해결  
+**Redisson** 방식을 이용
 
 
 
@@ -183,8 +204,16 @@ DDD 패키지 구조를 사용해보고자 했다.
 더욱 명확히 공부를 해야겠다는 생각...
 
 ### 8. CQRS
+
+조회를 하기 위해서는 두 개 이상의 애그리거트가 필요할 때가 많다.
+- 상태를 변경하는 범위와 조회하는 범위가 일치하지 않아 단일 모델로 두 종류의 기능을 구현하면 복잡해진다.
+- 이를 해결하기 위해 CQRS를 사용..!
+
 명령 관련 로직과 조회 관련 로직을 분리하기 위해
 command, query라는 패키지로 나누었다.
+
+#### 처음 사용하다 보니 이렇게 사용하는게 맞는지 잘 모르겠다.  
+- 추가적으로 더 공부하고 적용해볼 예정
 
 ### 9. TEST Code
 ``테스트 코드 작성 이유``  
@@ -248,9 +277,11 @@ remove : 파일을 삭제하는 작업에 대한 커밋
     - 생성 관련 어노테이션 (ex: Builder, RequiredArgsConstructor)
     
 
-### 🔥 더 공부해볼 내용 && 궁금한 내용
+### 🔥 더 공부해볼 내용 
 1. 패키지 의존성
 2. DDD 
    - 내가 적용한 방식이 맞는 방식인지
 3. 단위테스트와 통합테스트
    - 테스트를 작성하는 기준을 좀 더 명확히 해야할듯
+4. 동시성을 해결하기 위한 방법을 더 고민
+5. CQRS 
